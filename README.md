@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌑 FORBOC AI: DEVELOPER ACCOUNT PORTAL 🌑
 
-## Getting Started
+`Prócess_Id // Accoúnt_Ínit`
 
-First, run the development server:
+**ᚠ ᛫ ᛟ ᛫ ᚱ ᛫ ᛒ ᛫ ᛟ ᛫ ᚲ**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+      _______
+    /  _____  \
+   |  |     |  |
+   |  |     |  |
+   |  |_____|  |
+    \ _______ /
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The **Developer Account Portal** is the gateway to the ForbocAI Neural Grid. It provides the administrative tools for API key management, usage analytics, and agent ownership verification for digital souls.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> *Access is a privilege. Ownership is absolute.*
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### ⚡ Infrastructure Specs
+Powered by **Next.js 15** and **Vengeance UI**, this portal ensures secure, high-speed management of your developer assets.
 
-## Learn More
+- **API Key Control**: Generate and revoke neural-link credentials.
+- **Usage Metrics**: Real-time telemetry on SLM inference and Vector DB syncs.
+- **Soul Ownership**: Dashboard for managing $FAI balances and Soul NFTs.
 
-To learn more about Next.js, take a look at the following resources:
+### 🛠️ Access Protocol
+To gain entry:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🌑 Aesthetic Directives
+The portal must remain visually synchronized with the [Style Guide](./style-guide.md).
+- **Reality Verification**: Informed by `Philip K. Dick`.
+- **System Integrity**: Informed by `William Gibson`.
+- **Forbidden Knowledge**: Informed by `H.P. Lovecraft`.
 
-## Deploy on Vercel
+---
+*ACCESS_GRANTED // SESSION_ENCRYPTED*
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

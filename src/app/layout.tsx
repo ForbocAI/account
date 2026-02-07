@@ -15,8 +15,60 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://console.forboc.ai"),
   title: "Console | Forboc AI",
-  description: "Developer Account Portal for Forboc AI SDK",
+  description: "Developer Account Portal for Forboc AI SDK. Manage API keys, billing, and project settings.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Console | Forboc AI",
+    description: "Developer Account Portal for Forboc AI SDK.",
+    url: "https://console.forboc.ai",
+    siteName: "Forboc Console",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 800,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Console | Forboc AI",
+    description: "Developer Account Portal for Forboc AI SDK.",
+    images: ["/logo.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://forboc.ai/#organization",
+      "name": "ForbocAI",
+      "url": "https://forboc.ai",
+      "logo": "https://forboc.ai/logo.png"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Forboc Console",
+      "operatingSystem": "Web",
+      "applicationCategory": "DeveloperApplication",
+      "description": "Developer dashboard for Forboc AI SDK account management.",
+      "url": "https://console.forboc.ai",
+      "publisher": {
+        "@id": "https://forboc.ai/#organization"
+      }
+    }
+  ]
 };
 
 export default function RootLayout({
@@ -26,6 +78,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <meta name="theme-color" content="#131313" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <Script src="https://www.googletagmanager.com/gtag/js?id=G-D7LDJHNM26" strategy="afterInteractive" />
       <Script id="google-analytics" strategy="afterInteractive">
         {`window.dataLayer = window.dataLayer || [];
@@ -43,7 +102,7 @@ gtag('config', 'G-D7LDJHNM26');`}
           <header className="sticky top-0 z-50 w-full border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
             <div className="container mx-auto px-6 h-16 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Image src="/logo.png" alt="Forboc AI" width={32} height={32} className="object-contain" />
+                <Image src="/logo.png" alt="Forboc AI" width={32} height={32} className="logo-theme object-contain" />
                 <span className="font-mono text-sm tracking-[0.3em] uppercase">Forboc Console</span>
               </div>
               <nav className="flex items-center gap-8">
