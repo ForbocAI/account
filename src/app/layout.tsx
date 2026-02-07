@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -34,9 +35,7 @@ export default function RootLayout({
           <header className="sticky top-0 z-50 w-full border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
             <div className="container mx-auto px-6 h-16 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-8 h-8 bg-red-950 border border-red-900 flex items-center justify-center">
-                  <span className="text-red-500 font-mono text-xl">F</span>
-                </div>
+                <Image src="/logo.png" alt="Forboc AI" width={32} height={32} className="object-contain" />
                 <span className="font-mono text-sm tracking-[0.3em] uppercase">Forboc Console</span>
               </div>
               <nav className="flex items-center gap-8">
