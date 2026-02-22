@@ -2,9 +2,9 @@ import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/vengeance/Card";
 import { Button } from "@/components/vengeance/Button";
 import { Input } from "@/components/vengeance/Input";
-import { Lock } from "lucide-react";
+import { UserPlus } from "lucide-react";
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <div className="min-h-[70vh] flex items-center justify-center">
       <div className="w-full max-w-md relative">
@@ -14,37 +14,39 @@ export default function LoginPage() {
 
         <Card className="relative overflow-hidden pt-12 pb-8 px-8">
           <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Lock className="w-24 h-24 text-red-500" />
+            <UserPlus className="w-24 h-24 text-red-500" />
           </div>
 
           <CardHeader className="text-center mb-10 border-none">
-            <CardTitle className="text-2xl text-white mb-2">Access Portal</CardTitle>
+            <CardTitle className="text-2xl text-white mb-2">Register Soul</CardTitle>
             <p className="text-[10px] text-zinc-500 font-mono tracking-[0.2em] uppercase">
-              Identify yourself to the Forboc Neural Network
+              Initialize a new identity on the Forboc Neural Grid
             </p>
           </CardHeader>
 
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest pl-1">Email Address</label>
-              <Input type="email" placeholder="admin@forboc.ai" />
+              <Input type="email" placeholder="operative@forboc.ai" />
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center px-1">
-                <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">Access Key</label>
-                <a href="#" className="text-[8px] font-mono text-zinc-600 hover:text-red-500 transition-colors uppercase">Forgot?</a>
-              </div>
+              <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest pl-1">Access Key</label>
+              <Input type="password" placeholder="••••••••••••••••" />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest pl-1">Confirm Access Key</label>
               <Input type="password" placeholder="••••••••••••••••" />
             </div>
 
             <Button variant="primary" size="full" className="mt-4">
-              Authorize Device
+              Initialize Account
             </Button>
 
             <div className="pt-6 border-t border-zinc-900 flex flex-col items-center gap-4">
-              <a href="/signup" className="auth-link text-[9px] font-mono uppercase tracking-widest">
-                New operative? Request access
+              <a href="/" className="auth-link text-[9px] font-mono uppercase tracking-widest">
+                Already registered? Authorize device
               </a>
               <div className="w-full flex justify-between items-center text-[8px] font-mono text-zinc-700">
                 <span>FORBOC_PROTOCOL_V4.2</span>
