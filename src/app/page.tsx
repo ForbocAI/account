@@ -38,12 +38,14 @@ export default function LoginPage() {
               <Input type="password" placeholder="••••••••••••••••" />
             </div>
 
-            <Button variant="primary" size="full" className="mt-4">
-              Authorize Device
-            </Button>
+            <a href="/dashboard">
+              <Button variant="primary" size="full" className="mt-4">
+                Authorize Device
+              </Button>
+            </a>
 
             <div className="pt-6 border-t border-zinc-900 flex flex-col items-center gap-4">
-              <a href="/signup" className="auth-link text-[9px] font-mono uppercase tracking-widest">
+              <a href="/signup" className="auth-link text-[12px] font-mono uppercase tracking-widest">
                 New operative? Request access
               </a>
               <div className="w-full flex justify-between items-center text-[8px] font-mono text-zinc-700">

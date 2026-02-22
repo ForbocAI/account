@@ -45,7 +45,7 @@ export default function SignUpPage() {
             </Button>
 
             <div className="pt-6 border-t border-zinc-900 flex flex-col items-center gap-4">
-              <a href="/" className="auth-link text-[9px] font-mono uppercase tracking-widest">
+              <a href="/" className="auth-link text-[12px] font-mono uppercase tracking-widest">
                 Already registered? Authorize device
               </a>
               <div className="w-full flex justify-between items-center text-[8px] font-mono text-zinc-700">
