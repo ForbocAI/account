@@ -11,7 +11,7 @@ This log tracks the administrative and economic infrastructure of the Portal.
 ## 1. Credential Management (The Keys) 🔑
 *Objective: Secure access to the Neural Grid.*
 
-- [ ] **API Key Generation**: Functional UI to generate, name, and revoke ForbocAI credentials.
+- [x] **API Key Generation**: Functional UI to generate, name, and revoke ForbocAI credentials. Backed by PostgreSQL with SHA-256 key hashing.
 - [ ] **Credential Signing**: Implement client-side key storage for session signing.
 
 ## 2. Grid Telemetry (Analytics) 📊
@@ -29,8 +29,8 @@ This log tracks the administrative and economic infrastructure of the Portal.
 - [ ] **Soul Asset Registry**: List ownable NPC Souls (Metaplex Core Assets) linked to the wallet.
 
 ## 4. Authentication Flow (Gatekeeping) 🛡️
-- [ ] **Haskell API Auth**: Connect the login portal to the `/status` and `/auth` endpoints of the API.
-- [ ] **Secure Storage**: Move session tokens to HttpOnly cookies.
+- [ ] **Haskell API Auth**: Connect the login portal to the `/status` and `/auth` endpoints of the API. *(Partial: full auth flow built with Next.js API routes + PostgreSQL; Haskell delegation pending.)*
+- [x] **Secure Storage**: Session tokens stored in HttpOnly + Secure + SameSite=Lax cookies via JWT.
 
 ---
 *SYSTEM_INTEGRITY: LOCKED // ACCESS_MONITORED*
