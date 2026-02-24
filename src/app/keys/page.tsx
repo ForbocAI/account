@@ -107,9 +107,6 @@ export default function KeysPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleCopyPrefix = async (prefix: string) => {
-    await navigator.clipboard.writeText(prefix);
-  };
 
   return (
     <div className="space-y-12">
@@ -164,16 +161,8 @@ export default function KeysPage() {
                     </code>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="px-2 py-1 h-8"
-                      onClick={() => handleCopyPrefix(key.keyPrefix)}
-                    >
-                      <Copy className="w-3 h-3" />
-                    </Button>
-                    {key.status === "active" && (
+                  {key.status === "active" && (
+                    <div className="flex items-center gap-2">
                       <Button
                         variant="destructive"
                         size="sm"
@@ -182,8 +171,8 @@ export default function KeysPage() {
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </Card>
             ))}
