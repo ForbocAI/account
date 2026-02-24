@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/vengeance
 import { Button } from "@/components/vengeance/Button";
 import { Input } from "@/components/vengeance/Input";
 import { Lock } from "lucide-react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -111,9 +112,9 @@ export default function LoginPage() {
               </Button>
 
               <div className="pt-6 border-t border-zinc-900 flex flex-col items-center gap-4">
-                <a href="/signup" className="auth-link text-[12px] font-mono uppercase tracking-widest">
+                <Link href="/signup" className="auth-link text-[12px] font-mono uppercase tracking-widest">
                   New operative? Request access
-                </a>
+                </Link>
                 <div className="w-full flex justify-between items-center text-[8px] font-mono text-zinc-700">
                   <span>FORBOC_PROTOCOL_V4.2</span>
                   <span>EST_SYNC_2026</span>
