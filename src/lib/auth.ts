@@ -1,9 +1,7 @@
-import { hash, compare } from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-const BCRYPT_ROUNDS = 12;
 const COOKIE_NAME = "forboc_session";
 const JWT_EXPIRY = "7d";
 
@@ -11,17 +9,6 @@ function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error("JWT_SECRET environment variable is not set");
   return new TextEncoder().encode(secret);
-}
-
-export async function hashPassword(password: string): Promise<string> {
-  return hash(password, BCRYPT_ROUNDS);
-}
-
-export async function verifyPassword(
-  password: string,
-  passwordHash: string
-): Promise<boolean> {
-  return compare(password, passwordHash);
 }
 
 export async function createToken(userId: string): Promise<string> {
