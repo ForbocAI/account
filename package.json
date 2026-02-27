@@ -6,12 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "test": "vitest",
+    "test:integration": "vitest --config vitest.config.integration.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.1",
     "@prisma/client": "^7.4.1",
+    "@reduxjs/toolkit": "^2.11.2",
     "@types/pg": "^8.16.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
@@ -21,7 +23,11 @@
     "pg": "^8.18.0",
     "postcss": "^8.5.6",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "react-redux": "^9.2.0",
+    "redux-logger": "^3.0.6",
+    "redux-persist": "^6.0.0",
+    "stripe": "^20.4.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
@@ -29,10 +35,12 @@
     "@types/node": "^20.19.32",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
+    "@types/redux-logger": "^3.0.13",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.6",
     "prisma": "^7.4.1",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

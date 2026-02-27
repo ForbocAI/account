@@ -8,12 +8,15 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  apiKeys      ApiKey[]
+  id               String        @id @default(cuid())
+  email            String        @unique
+  passwordHash     String        @map("password_hash")
+  stripeCustomerId String?       @unique @map("stripe_customer_id")
+  plan             String        @default("free")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  apiKeys          ApiKey[]
+  subscription     Subscription?
 
   @@map("users")
 }
@@ -32,4 +35,20 @@ model ApiKey {
   @@index([userId])
   @@index([keyHash])
   @@map("api_keys")
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique @map("user_id")
+  stripeSubscriptionId String    @unique @map("stripe_subscription_id")
+  stripePriceId        String    @map("stripe_price_id")
+  status               String    @default("active")
+  currentPeriodStart   DateTime  @map("current_period_start")
+  currentPeriodEnd     DateTime  @map("current_period_end")
+  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/vengeance/Header";
+import { ReduxProvider } from "@/components/providers/redux-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -95,16 +96,18 @@ gtag('config', 'G-D7LDJHNM26');`}
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-950 text-zinc-100 selection:bg-red-900 selection:text-white`}
       >
-        <div className="relative min-h-screen flex flex-col">
-          {/* Subtle Grid Overlay */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+        <ReduxProvider> {/* Wrapped children with ReduxProvider */}
+          <div className="relative min-h-screen flex flex-col">
+            {/* Subtle Grid Overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[40px_40px] pointer-events-none" />
 
-          <Header />
+            <Header />
 
-          <main className="relative flex-1 container mx-auto px-6 py-12">
-            {children}
-          </main>
-        </div>
+            <main className="relative flex-1 container mx-auto px-6 py-12">
+              {children}
+            </main>
+          </div>
+        </ReduxProvider>
       </body>
     </html>
   );

@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setCredentials } from "@/store/slices/authSlice";
+import { setSignupEmail, setSignupError, resetForm, selectSignupForm } from "@/store/slices/formSlice";
+import { useSignupMutation } from "@/store/api/authApi";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/vengeance/Card";
 import { Button } from "@/components/vengeance/Button";
 import { Input } from "@/components/vengeance/Input";
@@ -9,48 +13,41 @@ import { UserPlus } from "lucide-react";
 import Link from "next/link";
 
 export default function SignUpPage() {
+  const dispatch = useAppDispatch();
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  // Select state from form slice
+  const { email, error: formError } = useAppSelector(selectSignupForm);
+
+  // RTK Query mutation
+  const [signup, { isLoading }] = useSignupMutation();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    dispatch(setSignupError(null));
+
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
 
     if (password !== confirmPassword) {
-      setError("Access keys do not match");
+      dispatch(setSignupError("Access keys do not match"));
       return;
     }
 
     if (password.length < 8) {
-      setError("Access key must be at least 8 characters");
+      dispatch(setSignupError("Access key must be at least 8 characters"));
       return;
     }
 
-    setLoading(true);
-
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Registration failed");
-        return;
-      }
-
+      const result = await signup({ email, password }).unwrap();
+      dispatch(setCredentials(result.user));
+      dispatch(resetForm("signup"));
       router.push("/dashboard");
-    } catch {
-      setError("Network error. Try again.");
-    } finally {
-      setLoading(false);
+    } catch (err: unknown) {
+      const error = err as { data?: { error?: string } };
+      dispatch(setSignupError(error.data?.error || "Registration failed"));
     }
   };
 
@@ -74,10 +71,10 @@ export default function SignUpPage() {
 
           <CardContent>
             <form onSubmit={handleSignup} className="space-y-6">
-              {error && (
+              {formError && (
                 <div className="p-3 border border-red-900/50 bg-red-950/10">
                   <p className="text-[11px] font-mono text-red-500 uppercase tracking-wide">
-                    {error}
+                    {formError}
                   </p>
                 </div>
               )}
@@ -87,10 +84,11 @@ export default function SignUpPage() {
                   Email Address
                 </label>
                 <Input
+                  name="email"
                   type="email"
                   placeholder="operative@forboc.ai"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => dispatch(setSignupEmail(e.target.value))}
                   required
                 />
               </div>
@@ -100,10 +98,9 @@ export default function SignUpPage() {
                   Access Key
                 </label>
                 <Input
+                  name="password"
                   type="password"
                   placeholder="••••••••••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={8}
                 />
@@ -114,10 +111,9 @@ export default function SignUpPage() {
                   Confirm Access Key
                 </label>
                 <Input
+                  name="confirmPassword"
                   type="password"
                   placeholder="••••••••••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   minLength={8}
                 />
@@ -128,9 +124,9 @@ export default function SignUpPage() {
                 variant="primary"
                 size="full"
                 className="mt-4"
-                disabled={loading}
+                disabled={isLoading}
               >
-                {loading ? "Initializing..." : "Initialize Account"}
+                {isLoading ? "Initializing..." : "Initialize Account"}
               </Button>
 
               <div className="pt-6 border-t border-zinc-900 flex flex-col items-center gap-4">

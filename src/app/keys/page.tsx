@@ -1,118 +1,76 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  setKeysNewKeyName,
+  setKeysShowModal,
+  setKeysRevealedKey,
+  setKeysError,
+  resetForm,
+  selectKeysForm
+} from "@/store/slices/formSlice";
+import {
+  useGetKeysQuery,
+  useCreateKeyMutation,
+  useRevokeKeyMutation
+} from "@/store/api/keysApi";
 import { Card } from "@/components/vengeance/Card";
 import { Button } from "@/components/vengeance/Button";
 import { Badge } from "@/components/vengeance/Badge";
 import { Input } from "@/components/vengeance/Input";
-import { Copy, Trash2, Key, X, AlertTriangle, Check, Loader2 } from "lucide-react";
-
-interface ApiKey {
-  id: string;
-  name: string;
-  keyPrefix: string;
-  status: string;
-  createdAt: string;
-}
+import { Copy, Trash2, Key, X, AlertTriangle, Loader2 } from "lucide-react";
 
 export default function KeysPage() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [newKeyName, setNewKeyName] = useState("");
-  const [revealedKey, setRevealedKey] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [error, setError] = useState("");
+  const dispatch = useAppDispatch();
 
-  const fetchKeys = useCallback(async () => {
-    try {
-      const res = await fetch("/api/keys");
-      if (!res.ok) return;
-      const data = await res.json();
-      setApiKeys(data.keys);
-    } catch {
-      setError("Failed to load keys");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Select state from Redux
+  const { newKeyName, showModal, revealedKey, error: formError } = useAppSelector(selectKeysForm);
 
-  useEffect(() => {
-    fetchKeys();
-  }, [fetchKeys]);
+  // RTK Query hooks
+  const { data, isLoading: loading, error: queryError } = useGetKeysQuery(undefined);
+  const [createKey, { isLoading: creating }] = useCreateKeyMutation();
+  const [revokeKey] = useRevokeKeyMutation();
+
+  const apiKeys = data?.keys || [];
+  const error = formError || (queryError as { data?: { error?: string } } | undefined)?.data?.error;
 
   const handleCreate = async () => {
     if (!newKeyName.trim()) return;
-    setCreating(true);
-    setError("");
+    dispatch(setKeysError(null));
 
     try {
-      const res = await fetch("/api/keys", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newKeyName.trim() }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Failed to create key");
-        return;
-      }
-
-      setRevealedKey(data.key.rawKey);
-      setApiKeys((prev) => [
-        {
-          id: data.key.id,
-          name: data.key.name,
-          keyPrefix: data.key.keyPrefix,
-          status: data.key.status,
-          createdAt: data.key.createdAt,
-        },
-        ...prev,
-      ]);
-    } catch {
-      setError("Network error. Try again.");
-    } finally {
-      setCreating(false);
+      const result = await createKey({ name: newKeyName.trim() }).unwrap();
+      dispatch(setKeysRevealedKey(result.key.rawKey));
+    } catch (err: unknown) {
+      const e = err as { data?: { error?: string } };
+      dispatch(setKeysError(e.data?.error || "Failed to create key"));
     }
   };
 
   const handleRevoke = async (id: string) => {
     try {
-      const res = await fetch(`/api/keys/${id}`, { method: "DELETE" });
-      if (!res.ok) return;
-
-      setApiKeys((prev) =>
-        prev.map((k) => (k.id === id ? { ...k, status: "revoked" } : k))
-      );
-    } catch {
-      setError("Failed to revoke key");
+      await revokeKey(id).unwrap();
+    } catch (err: unknown) {
+      const e = err as { data?: { error?: string } };
+      dispatch(setKeysError(e.data?.error || "Failed to revoke key"));
     }
   };
 
   const handleClose = () => {
-    setNewKeyName("");
-    setRevealedKey(null);
-    setCopied(false);
-    setShowModal(false);
-    setError("");
+    dispatch(resetForm("keys"));
   };
 
   const handleCopyKey = async () => {
     if (!revealedKey) return;
     await navigator.clipboard.writeText(revealedKey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
-
 
   return (
     <div className="space-y-12">
       <div className="flex flex-col gap-2 border-l-4 border-red-900 pl-6 py-2">
         <h1 className="text-4xl font-mono tracking-tighter text-white">Credential Management</h1>
-        <p className="text-zinc-500 text-sm max-w-2xl font-sans uppercase tracking-[0.1em]">
+        <p className="text-zinc-500 text-sm max-w-2xl font-sans uppercase tracking-widest">
           Neural-link credentials for the Forboc Grid. Generate, inspect, and revoke access keys.
         </p>
       </div>
@@ -129,7 +87,7 @@ export default function KeysPage() {
             <Key className="w-5 h-5 text-red-500" />
             <h2 className="text-xl font-mono text-white">Active Credentials</h2>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setShowModal(true)}>
+          <Button variant="outline" size="sm" onClick={() => dispatch(setKeysShowModal(true))}>
             Generate New Key
           </Button>
         </div>
@@ -146,7 +104,7 @@ export default function KeysPage() {
           </div>
         ) : (
           <div className="grid gap-4">
-            {apiKeys.map((key) => (
+            {apiKeys.map((key: { id: string; name: string; status: string; keyPrefix: string }) => (
               <Card key={key.id} className="group hover:border-zinc-700 transition-colors py-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
@@ -219,7 +177,7 @@ export default function KeysPage() {
                         type="text"
                         placeholder="e.g. Production Gateway"
                         value={newKeyName}
-                        onChange={(e) => setNewKeyName(e.target.value)}
+                        onChange={(e) => dispatch(setKeysNewKeyName(e.target.value))}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") handleCreate();
                         }}
@@ -282,11 +240,7 @@ export default function KeysPage() {
                           className="px-2 py-2 h-10 shrink-0"
                           onClick={handleCopyKey}
                         >
-                          {copied ? (
-                            <Check className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
+                          <Copy className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
