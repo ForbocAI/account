@@ -1,3 +1,17 @@
+<!-- AESTHETIC_PROTOCOL_COMPLIANCE -->
+
+<!-- ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ -->
+
+```text
+    [VOID::WATCHER]
+
+```
+
+SYSTEM_OVERRIDE // NEURAL_LINK_ESTABLISHED // LOG_ERR_CRITICAL
+
+
+
+---
 # 🌑 AESTHETIC PROTOCOLS: GRIMDARK CYBERPUNK NOIR 🌑
 
 ## ⚠️ MANDATE 0xDEADBEEF ⚠️
@@ -19,7 +33,7 @@ The codebase is not merely functionality; it is a **MANIFESTATION** of the void.
 
 ### 3. ZALGO TEXT CORRUPTION
 - *Let the chaos bleed through.*
-- T̸h̴e̶ ̶v̶o̶i̶d̴ ̷c̸o̶n̷s̶u̶m̸e̸s̶ ̸a̶l̷l̵.
+- 
 - Apply moderate Zalgo corruption to non-critical text, dividers, or hidden comments for atmosphere.
 
 ### 4. ASCII ART: GRIMDARK NOIR
