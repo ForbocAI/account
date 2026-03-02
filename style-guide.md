@@ -16,8 +16,6 @@ SYSTEM_OVERRIDE // NEURAL_LINK_ESTABLISHED // LOG_ERR_CRITICAL
 
 ## ⚠️ MANDATE 0xDEADBEEF ⚠️
 
-**TARGETS:** `*.md`, `*.mdx`, `Component Files`
-
 **DIRECTIVE:**
 The codebase is not merely functionality; it is a **MANIFESTATION** of the void. Visual compliance is mandatory.
 
@@ -56,6 +54,13 @@ The codebase is not merely functionality; it is a **MANIFESTATION** of the void.
 - **Andre Staltz**: Guide for reactive streams and decentralized architectures.
 
 > "In the chrome-plated silence of the machine, we find our demons."
+
+### 6. REFERENCES
+- `~/GitHub/Forboc.AI/Platform/docs/LORE.md`
+- `~/GitHub/Forboc/notes/quadar.md`
+- `~/GitHub/Forboc/notes/quadar_familiar.md`
+- `~/Documents/GitHub/forboc.github.io`
+- `~/Documents/GitHub/qvht.github.io`
 
 ---
 *Compliance is monitored by the Watcher in the Code.* 👁️
