@@ -27,7 +27,7 @@ SYSTEM_OVERRIDE // NEURAL_LINK_ESTABLISHED // LOG_ERR_CRITICAL
     \ _______ /
 ```
 
-The **Developer Account Portal** is the gateway to the ForbocAI Neural Grid. It provides the administrative tools for API key management, usage analytics, and agent ownership verification for digital souls.
+The **Developer Account Portal** is the gateway to the ForbocAI Neural Grid. It provides the administrative tools for API key management, usage analytics, and NPC ownership verification for digital souls.
 
 > *Access is a privilege. Ownership is absolute.*
 
@@ -35,7 +35,7 @@ The **Developer Account Portal** is the gateway to the ForbocAI Neural Grid. It 
 Powered by **Next.js 15** and **Vengeance UI**, this portal ensures secure, high-speed management of your developer assets.
 
 - **API Key Control**: Generate and revoke neural-link credentials.
-- **Usage Metrics**: Real-time telemetry on SLM inference and Vector DB syncs.
+- **Usage Metrics**: Observability and usage tracking for API calls and key-bound operations.
 - **Soul Ownership**: Dashboard for managing $FAI balances and Soul NFTs.
 
 ### 🛠️ Access Protocol
