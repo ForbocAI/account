@@ -7,8 +7,7 @@ const JWT_EXPIRY = "7d";
 
 function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET environment variable is not set");
-  return new TextEncoder().encode(secret);
+  return secret ? new TextEncoder().encode(secret) : (() => { throw new Error("JWT_SECRET environment variable is not set"); })();
 }
 
 export async function createToken(userId: string): Promise<string> {
@@ -24,8 +23,7 @@ export async function verifyToken(
 ): Promise<{ userId: string } | null> {
   try {
     const { payload } = await jwtVerify(token, getJwtSecret());
-    if (!payload.sub) return null;
-    return { userId: payload.sub };
+    return payload.sub ? { userId: payload.sub } : null;
   } catch {
     return null;
   }
@@ -55,8 +53,7 @@ export async function getSession(
   request: NextRequest
 ): Promise<{ userId: string } | null> {
   const token = request.cookies.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  return verifyToken(token);
+  return token ? verifyToken(token) : null;
 }
 
 export async function getSessionFromCookies(): Promise<{
@@ -64,8 +61,7 @@ export async function getSessionFromCookies(): Promise<{
 } | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  return verifyToken(token);
+  return token ? verifyToken(token) : null;
 }
 
 export { COOKIE_NAME };

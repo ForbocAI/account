@@ -35,18 +35,18 @@ export default function KeysPage() {
   const apiKeys = data?.keys || [];
   const error = formError || (queryError as { data?: { error?: string } } | undefined)?.data?.error;
 
-  const handleCreate = async () => {
-    if (!newKeyName.trim()) return;
-    dispatch(setKeysError(null));
-
-    try {
-      const result = await createKey({ name: newKeyName.trim() }).unwrap();
-      dispatch(setKeysRevealedKey(result.key.rawKey));
-    } catch (err: unknown) {
-      const e = err as { data?: { error?: string } };
-      dispatch(setKeysError(e.data?.error || "Failed to create key"));
-    }
-  };
+  const handleCreate = async () =>
+    !newKeyName.trim()
+      ? Promise.resolve()
+      : Promise.resolve().then(() => {
+          dispatch(setKeysError(null));
+          return createKey({ name: newKeyName.trim() }).unwrap()
+            .then(result => dispatch(setKeysRevealedKey(result.key.rawKey)))
+            .catch((err: unknown) => {
+              const e = err as { data?: { error?: string } };
+              dispatch(setKeysError(e.data?.error || "Failed to create key"));
+            });
+        });
 
   const handleRevoke = async (id: string) => {
     try {
@@ -62,8 +62,7 @@ export default function KeysPage() {
   };
 
   const handleCopyKey = async () => {
-    if (!revealedKey) return;
-    await navigator.clipboard.writeText(revealedKey);
+    revealedKey && await navigator.clipboard.writeText(revealedKey);
   };
 
   return (
@@ -179,7 +178,7 @@ export default function KeysPage() {
                         value={newKeyName}
                         onChange={(e) => dispatch(setKeysNewKeyName(e.target.value))}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") handleCreate();
+                          e.key === "Enter" && handleCreate();
                         }}
                         autoFocus
                       />

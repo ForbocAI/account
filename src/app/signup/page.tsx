@@ -30,25 +30,20 @@ export default function SignUpPage() {
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
 
-    if (password !== confirmPassword) {
-      dispatch(setSignupError("Access keys do not match"));
-      return;
-    }
-
-    if (password.length < 8) {
-      dispatch(setSignupError("Access key must be at least 8 characters"));
-      return;
-    }
-
-    try {
-      const result = await signup({ email, password }).unwrap();
-      dispatch(setCredentials(result.user));
-      dispatch(resetForm("signup"));
-      router.push("/dashboard");
-    } catch (err: unknown) {
-      const error = err as { data?: { error?: string } };
-      dispatch(setSignupError(error.data?.error || "Registration failed"));
-    }
+    return password !== confirmPassword
+      ? Promise.resolve(dispatch(setSignupError("Access keys do not match")))
+      : password.length < 8
+      ? Promise.resolve(dispatch(setSignupError("Access key must be at least 8 characters")))
+      : signup({ email, password }).unwrap()
+          .then(result => {
+            dispatch(setCredentials(result.user));
+            dispatch(resetForm("signup"));
+            router.push("/dashboard");
+          })
+          .catch((err: unknown) => {
+            const error = err as { data?: { error?: string } };
+            dispatch(setSignupError(error.data?.error || "Registration failed"));
+          });
   };
 
   return (

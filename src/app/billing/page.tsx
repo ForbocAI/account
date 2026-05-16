@@ -58,43 +58,33 @@ export default function BillingPage() {
         dispatch(setBillingUpgrading(planKey));
         dispatch(setBillingError(null));
 
-        try {
-            const result = await createCheckout({ planKey }).unwrap();
-            if (result.url) {
-                window.location.assign(result.url);
-            }
-        } catch (err: unknown) {
-            const e = err as { data?: { error?: string } };
-            dispatch(setBillingError(e.data?.error || "Failed to create checkout session"));
-            dispatch(setBillingUpgrading(null));
-        }
+        return createCheckout({ planKey }).unwrap()
+            .then(result => { result.url && window.location.assign(result.url); })
+            .catch((err: unknown) => {
+                const e = err as { data?: { error?: string } };
+                dispatch(setBillingError(e.data?.error || "Failed to create checkout session"));
+                dispatch(setBillingUpgrading(null));
+            });
     };
 
     const handleManageBilling = async () => {
         dispatch(setBillingPortalLoading(true));
         dispatch(setBillingError(null));
 
-        try {
-            const result = await openPortal(undefined).unwrap();
-            if (result.url) {
-                window.location.assign(result.url);
-            }
-        } catch (err: unknown) {
-            const e = err as { data?: { error?: string } };
-            dispatch(setBillingError(e.data?.error || "Failed to open billing portal"));
-            dispatch(setBillingPortalLoading(false));
-        }
+        return openPortal(undefined).unwrap()
+            .then(result => { result.url && window.location.assign(result.url); })
+            .catch((err: unknown) => {
+                const e = err as { data?: { error?: string } };
+                dispatch(setBillingError(e.data?.error || "Failed to open billing portal"));
+                dispatch(setBillingPortalLoading(false));
+            });
     };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 className="w-8 h-8 text-zinc-500 animate-spin" />
-            </div>
-        );
-    }
-
-    return (
+    return loading ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+            <Loader2 className="w-8 h-8 text-zinc-500 animate-spin" />
+        </div>
+    ) : (
         <div className="space-y-12">
             {/* Page Header */}
             <div className="flex flex-col gap-2 border-l-4 border-red-900 pl-6 py-2">
