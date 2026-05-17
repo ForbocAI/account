@@ -8,6 +8,7 @@
     "start": "next start",
     "test": "vitest",
     "test:integration": "vitest --config vitest.config.integration.ts",
+    "verify:all": "bash scripts/verify-all.sh",
     "postinstall": "prisma generate"
   },
   "dependencies": {
