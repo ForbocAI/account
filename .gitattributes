@@ -1,0 +1,11 @@
+# Auto-normalize text files; bash scripts and other Unix-target text must be
+# LF regardless of how Windows checkouts behave. scripts/verify-all.sh runs on
+# local Linux/WSL and CRLF line endings would break the shebang.
+* text=auto
+
+*.sh    text eol=lf
+*.bash  text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.md    text eol=lf
