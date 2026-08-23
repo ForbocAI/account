@@ -1,57 +1,48 @@
-<!-- AESTHETIC_PROTOCOL_COMPLIANCE -->
+# ForbocAI Account
 
-<!-- ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ -->
+Use the ForbocAI Account portal to create the credentials and subscription that
+authorize a game to call the hosted ForbocAI NPC API.
 
-```text
-    [VOID::WATCHER]
+- Account portal: <https://account.forboc.ai>
+- SDK documentation: <https://docs.forboc.ai>
 
-```
+## Connect A Game
 
-SYSTEM_OVERRIDE // NEURAL_LINK_ESTABLISHED // LOG_ERR_CRITICAL
+1. Create or sign in to a ForbocAI account.
+2. Create an API key for the game or deployment that will use it.
+3. Provide the key to the game runtime as `FORBOCAI_API_KEY`.
+4. Install the TypeScript or Unreal Engine SDK and send game-owned NPC identity,
+   persona, observation, and world context through that SDK.
 
+The SDK selects the hosted ForbocAI API without URL configuration. Set
+`FORBOCAI_API_URL` only when the game intentionally targets another deployment.
 
+## Account Responsibilities
 
----
-# 🌑 FORBOC AI: DEVELOPER ACCOUNT PORTAL 🌑
+The portal owns:
 
-`Prócess_Id // Accoúnt_Ínit`
+- account authentication
+- API-key creation, one-time key reveal, listing, and revocation
+- subscription selection and billing management
+- usage and quota presentation
 
-**ᚠ ᛫ ᛟ ᛫ ᚱ ᛫ ᛒ ᛫ ᛟ ᛫ ᚲ**
+The portal does not own NPC identity, game state, dialogue presentation, action
+execution, memory data, or Soul data. Those remain at the game and SDK
+boundaries defined by the ForbocAI integration contract.
 
-```text
-      _______
-    /  _____  \
-   |  |     |  |
-   |  |     |  |
-   |  |_____|  |
-    \ _______ /
-```
+## Credential Handling
 
-The **Developer Account Portal** is the gateway to the ForbocAI Neural Grid. It provides the administrative tools for API key management, usage analytics, and NPC ownership verification for digital souls.
+Treat each API key as a secret. Keep it outside source control, reflected game
+assets, browser bundles, logs, screenshots, and save files. Use a distinct key
+per deployment boundary and revoke a key immediately when its custody becomes
+uncertain.
 
-> *Access is a privilege. Ownership is absolute.*
+## SDKs
 
-### ⚡ Infrastructure Specs
-Powered by **Next.js 15** and **Vengeance UI**, this portal ensures secure, high-speed management of your developer assets.
+- TypeScript SDK: <https://docs.forboc.ai/npm/welcome>
+- Unreal Engine SDK: <https://docs.forboc.ai/ue/welcome>
 
-- **API Key Control**: Generate and revoke neural-link credentials.
-- **Usage Metrics**: Observability and usage tracking for API calls and key-bound operations.
-- **Soul Ownership**: Dashboard for managing $FAI balances and Soul NFTs.
+## License
 
-### 🛠️ Access Protocol
-To gain entry:
-
-```bash
-npm install
-npm run dev
-```
-
-### 🌑 Aesthetic Directives
-The portal must remain visually synchronized with the [Style Guide](./style-guide.md).
-- **Reality Verification**: Informed by `Philip K. Dick`.
-- **System Integrity**: Informed by `William Gibson`.
-- **Forbidden Knowledge**: Informed by `H.P. Lovecraft`.
-
----
-*ACCESS_GRANTED // SESSION_ENCRYPTED*
+All rights reserved. See [LICENSE](./LICENSE).
 
