@@ -10,6 +10,7 @@ import type {
 type ApiKeyRoutes = {
     readonly list: () => Promise<Response>;
     readonly create: (request: JsonRequest) => Promise<Response>;
+    readonly revoke: (id: string) => Promise<Response>;
 };
 
 type NamedRequest = { readonly name?: unknown };
@@ -38,6 +39,21 @@ const maskedPrefix = (rawKey: string): string =>
     rawKey.slice(0, apiKeyContract.generation.visiblePrefixCharacters)
     + apiKeyContract.generation.mask
     + rawKey.slice(-apiKeyContract.generation.visibleSuffixCharacters);
+
+const revokeResponses: Readonly<Record<string, () => Response>> = {
+    [apiKeyContract.revoke.outcomes.notFound]: () => json(
+        { error: httpContract.errors.keyNotFound },
+        httpContract.status.notFound,
+    ),
+    [apiKeyContract.revoke.outcomes.alreadyRevoked]: () => json(
+        { error: httpContract.errors.keyAlreadyRevoked },
+        httpContract.status.badRequest,
+    ),
+    [apiKeyContract.revoke.outcomes.revoked]: () => json(
+        apiKeyContract.revoke.success,
+        httpContract.status.ok,
+    ),
+};
 
 export const createApiKeyRoutes = (dependencies: ApiKeyRouteDependencies): ApiKeyRoutes => {
     const withSession = async (
@@ -93,5 +109,11 @@ export const createApiKeyRoutes = (dependencies: ApiKeyRouteDependencies): ApiKe
             }),
         }));
 
-    return { list, create };
+    const revoke = (id: string): Promise<Response> => withSession(async (session) =>
+        matchResult(await attempt(() => dependencies.persistence.revoke(session.userId, id)), {
+            failure: internalFailure,
+            success: (outcome) => (revokeResponses[outcome.tag] ?? internalFailure)(),
+        }));
+
+    return { list, create, revoke };
 };

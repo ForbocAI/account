@@ -49,12 +49,18 @@ describe(fixtures.suite, () => {
             },
         });
 
-        const revoked = await prisma.apiKey.update({
-            where: { id: apiKey.id },
-            data: { status: apiKeyContract.status.revoked, revokedAt: new Date() },
+        const routes = createApiKeyRoutes({
+            readSession: async () => ({ userId: user.id }),
+            persistence: apiKeyPersistence,
+            randomHex: () => fixtures.generated.hex,
+            hash: () => fixtures.generated.hash,
         });
+        const response = await routes.revoke(apiKey.id);
+        const revoked = await prisma.apiKey.findUnique({ where: { id: apiKey.id } });
 
-        expect(revoked.status).toBe(apiKeyContract.status.revoked);
-        expect(revoked.revokedAt).toBeDefined();
+        expect(response.status).toBe(httpContract.status.ok);
+        expect(await response.json()).toEqual(apiKeyContract.revoke.success);
+        expect(revoked?.status).toBe(apiKeyContract.status.revoked);
+        expect(revoked?.revokedAt).toBeDefined();
     });
 });

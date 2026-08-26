@@ -20,6 +20,16 @@
     "createFailed": "Failed to create key",
     "revokeFailed": "Failed to revoke key"
   },
+  "revoke": {
+    "outcomes": {
+      "notFound": "not-found",
+      "alreadyRevoked": "already-revoked",
+      "revoked": "revoked"
+    },
+    "success": {
+      "success": true
+    }
+  },
   "ordering": {
     "createdAt": "desc"
   }

@@ -24,9 +24,14 @@ export type ApiKeyCreateInput = {
     readonly status: string;
 };
 
+export type ApiKeyRevokeOutcome = {
+    readonly tag: string;
+};
+
 export type ApiKeyPersistence = {
     readonly list: (userId: string) => Promise<readonly ApiKeyListItem[]>;
     readonly create: (input: ApiKeyCreateInput) => Promise<ApiKeyRecord>;
+    readonly revoke: (userId: string, id: string) => Promise<ApiKeyRevokeOutcome>;
 };
 
 export type JsonRequest = {

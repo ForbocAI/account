@@ -32,6 +32,7 @@ const dependencies = (
     persistence: {
         list: async () => [record],
         create: async () => record,
+        revoke: async () => ({ tag: apiKeyContract.revoke.outcomes.revoked }),
     },
     randomHex: () => fixtures.generated.hex,
     hash: () => fixtures.generated.hash,
@@ -72,7 +73,11 @@ describe(fixtures.suite, () => {
     it(fixtures.cases.create, async () => {
         const create = vi.fn(async () => record);
         const response = await createApiKeyRoutes(dependencies({
-            persistence: { list: async () => [], create },
+            persistence: {
+                list: async () => [],
+                create,
+                revoke: async () => ({ tag: apiKeyContract.revoke.outcomes.revoked }),
+            },
         })).create(request(fixtures.requests.valid));
 
         expect(response.status).toBe(httpContract.status.created);
@@ -100,8 +105,66 @@ describe(fixtures.suite, () => {
             persistence: {
                 list: async () => Promise.reject(new Error(fixtures.failure.message)),
                 create: async () => record,
+                revoke: async () => ({ tag: apiKeyContract.revoke.outcomes.revoked }),
             },
         })).list();
+
+        expect(response.status).toBe(httpContract.status.internalServerError);
+        expect(await response.json()).toEqual({ error: httpContract.errors.internalServer });
+    });
+
+    it(fixtures.cases.revokeMissing, async () => {
+        const response = await createApiKeyRoutes(dependencies({
+            persistence: {
+                list: async () => [record],
+                create: async () => record,
+                revoke: async () => ({ tag: apiKeyContract.revoke.outcomes.notFound }),
+            },
+        })).revoke(fixtures.requests.revokeId);
+
+        expect(response.status).toBe(httpContract.status.notFound);
+        expect(await response.json()).toEqual({ error: httpContract.errors.keyNotFound });
+    });
+
+    it(fixtures.cases.revokeRepeated, async () => {
+        const response = await createApiKeyRoutes(dependencies({
+            persistence: {
+                list: async () => [record],
+                create: async () => record,
+                revoke: async () => ({ tag: apiKeyContract.revoke.outcomes.alreadyRevoked }),
+            },
+        })).revoke(fixtures.requests.revokeId);
+
+        expect(response.status).toBe(httpContract.status.badRequest);
+        expect(await response.json()).toEqual({ error: httpContract.errors.keyAlreadyRevoked });
+    });
+
+    it(fixtures.cases.revoke, async () => {
+        const revoke = vi.fn(async () => ({ tag: apiKeyContract.revoke.outcomes.revoked }));
+        const response = await createApiKeyRoutes(dependencies({
+            persistence: {
+                list: async () => [record],
+                create: async () => record,
+                revoke,
+            },
+        })).revoke(fixtures.requests.revokeId);
+
+        expect(response.status).toBe(httpContract.status.ok);
+        expect(await response.json()).toEqual(apiKeyContract.revoke.success);
+        expect(revoke).toHaveBeenCalledWith(
+            fixtures.session.userId,
+            fixtures.requests.revokeId,
+        );
+    });
+
+    it(fixtures.cases.revokeFailure, async () => {
+        const response = await createApiKeyRoutes(dependencies({
+            persistence: {
+                list: async () => [record],
+                create: async () => record,
+                revoke: async () => Promise.reject(new Error(fixtures.failure.message)),
+            },
+        })).revoke(fixtures.requests.revokeId);
 
         expect(response.status).toBe(httpContract.status.internalServerError);
         expect(await response.json()).toEqual({ error: httpContract.errors.internalServer });

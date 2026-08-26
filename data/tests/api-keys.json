@@ -6,7 +6,10 @@
     "list": "returns 200 with the authenticated account keys",
     "create": "returns 201 and reveals the raw key once",
     "failure": "returns a controlled 500 response for persistence failure",
-    "revoke": "revokes an owned active key"
+    "revoke": "revokes an owned active key",
+    "revokeMissing": "returns 404 when the owned key does not exist",
+    "revokeRepeated": "returns 400 when the owned key is already revoked",
+    "revokeFailure": "returns a controlled 500 response when revocation fails"
   },
   "session": {
     "userId": "account-key-user",
@@ -22,7 +25,8 @@
     },
     "invalid": {
       "name": "   "
-    }
+    },
+    "revokeId": "account-key-record"
   },
   "generated": {
     "hex": "0123456789abcdef0123456789abcdef",
