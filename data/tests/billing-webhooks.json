@@ -1,0 +1,64 @@
+{
+  "secret": "whsec_account_integration_fixture",
+  "apiSecret": "sk_test_account_integration_fixture",
+  "requestUrl": "https://account.forboc.invalid/api/webhooks/stripe",
+  "signatureHeader": "stripe-signature",
+  "signature": "fixture-signature",
+  "invalidSignature": "invalid-fixture-signature",
+  "failure": "fixture-processing-failure",
+  "cases": {
+    "projection": "Stripe event projection",
+    "checkout": "hydrates checkout into an authoritative subscription command",
+    "update": "projects subscription updates without route-owned policy",
+    "unknown": "acknowledges unknown events without a subscription mutation",
+    "routes": "Stripe webhook route",
+    "valid": "applies a verified delivery",
+    "missingSignature": "fails closed when the signature is missing",
+    "invalidSignature": "fails closed when verification rejects the signature",
+    "transactionFailure": "returns a retriable failure when persistence rejects",
+    "database": "Stripe webhook database authority",
+    "duplicate": "applies duplicate deliveries once",
+    "outOfOrderUpdate": "preserves the newest subscription update",
+    "outOfOrderDelete": "preserves cancellation when an older checkout arrives later",
+    "unknownDatabase": "records unknown deliveries without changing billing state"
+  },
+  "user": {
+    "id": "billing-user-fixture",
+    "email": "billing-fixture@forboc.invalid",
+    "passwordHash": "billing-password-hash-fixture"
+  },
+  "subscription": {
+    "id": "sub_account_fixture",
+    "customerId": "cus_account_fixture",
+    "priceId": "price_account_fixture",
+    "planKey": "pro",
+    "status": "active",
+    "currentPeriodStart": 1787702400,
+    "currentPeriodEnd": 1790380800
+  },
+  "events": {
+    "checkout": {
+      "id": "evt_account_checkout",
+      "created": 1787702401
+    },
+    "newerUpdate": {
+      "id": "evt_account_update_newer",
+      "created": 1787702600,
+      "status": "past_due"
+    },
+    "olderUpdate": {
+      "id": "evt_account_update_older",
+      "created": 1787702500,
+      "status": "active"
+    },
+    "delete": {
+      "id": "evt_account_delete",
+      "created": 1787702700
+    },
+    "unknown": {
+      "id": "evt_account_unknown",
+      "created": 1787702800,
+      "type": "account.application.deauthorized"
+    }
+  }
+}

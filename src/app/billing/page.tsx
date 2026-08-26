@@ -7,48 +7,22 @@ import { Badge } from "@/components/vengeance/Badge";
 import { Stat } from "@/components/vengeance/Stat";
 import { CreditCard, Zap, Shield, ArrowUpRight, Loader2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { selectBilling } from "@/store/slices/billingSlice";
 import { selectBillingForm, setBillingUpgrading, setBillingPortalLoading, setBillingError } from "@/store/slices/formSlice";
 import {
     useGetBillingQuery,
     useCreateCheckoutMutation,
     useOpenPortalMutation
 } from "@/store/api/billingApi";
+import billingContract from "../../../data/contracts/billing.json";
 
-const PLAN_TIERS = [
-    {
-        key: "free",
-        name: "Initiate",
-        price: "Free",
-        requests: "1,000 / day",
-        features: ["1 API Key", "Community support", "Basic analytics"],
-    },
-    {
-        key: "pro",
-        name: "Operative",
-        price: "$49/mo",
-        requests: "50,000 / day",
-        features: ["Unlimited API Keys", "Priority support", "Advanced analytics", "Webhook access"],
-        highlighted: true,
-    },
-    {
-        key: "enterprise",
-        name: "Architect",
-        price: "$299/mo",
-        requests: "Unlimited",
-        features: ["Unlimited everything", "Dedicated support", "Custom SLAs", "On-prem deployment"],
-    },
-];
+const PLAN_TIERS = billingContract.plans;
 
 export default function BillingPage() {
     const dispatch = useAppDispatch();
 
-    // Select state from Redux using co-located selectors
-    const billing = useAppSelector(selectBilling);
     const { upgrading, portalLoading, error: formError } = useAppSelector(selectBillingForm);
 
-    // RTK Query hooks
-    const { isLoading: loading, error: queryError } = useGetBillingQuery(undefined);
+    const { data: billing, isLoading: loading, error: queryError } = useGetBillingQuery(undefined);
     const [createCheckout] = useCreateCheckoutMutation();
     const [openPortal] = useOpenPortalMutation();
 
@@ -59,10 +33,17 @@ export default function BillingPage() {
         dispatch(setBillingError(null));
 
         return createCheckout({ planKey }).unwrap()
-            .then(result => { result.url && window.location.assign(result.url); })
+            .then(result => {
+                if (!result.url) {
+                    dispatch(setBillingError(billingContract.messages.checkoutFailed));
+                    dispatch(setBillingUpgrading(null));
+                    return;
+                }
+                window.location.assign(result.url);
+            })
             .catch((err: unknown) => {
                 const e = err as { data?: { error?: string } };
-                dispatch(setBillingError(e.data?.error || "Failed to create checkout session"));
+                dispatch(setBillingError(e.data?.error || billingContract.messages.checkoutFailed));
                 dispatch(setBillingUpgrading(null));
             });
     };
@@ -72,19 +53,40 @@ export default function BillingPage() {
         dispatch(setBillingError(null));
 
         return openPortal(undefined).unwrap()
-            .then(result => { result.url && window.location.assign(result.url); })
+            .then(result => {
+                if (!result.url) {
+                    dispatch(setBillingError(billingContract.messages.portalFailed));
+                    dispatch(setBillingPortalLoading(false));
+                    return;
+                }
+                window.location.assign(result.url);
+            })
             .catch((err: unknown) => {
                 const e = err as { data?: { error?: string } };
-                dispatch(setBillingError(e.data?.error || "Failed to open billing portal"));
+                dispatch(setBillingError(e.data?.error || billingContract.messages.portalFailed));
                 dispatch(setBillingPortalLoading(false));
             });
     };
 
-    return loading ? (
+    if (loading) {
+        return (
         <div className="flex items-center justify-center min-h-[60vh]">
             <Loader2 className="w-8 h-8 text-zinc-500 animate-spin" />
         </div>
-    ) : (
+        );
+    }
+
+    if (!billing) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <p className="text-[11px] font-mono text-red-500 uppercase tracking-wide">
+                    {error || billingContract.messages.billingLoadFailed}
+                </p>
+            </div>
+        );
+    }
+
+    return (
         <div className="space-y-12">
             {/* Page Header */}
             <div className="flex flex-col gap-2 border-l-4 border-red-900 pl-6 py-2">
@@ -182,7 +184,7 @@ export default function BillingPage() {
                                                 {tier.name}
                                             </h3>
                                             <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-widest mt-1">
-                                                {tier.requests} requests
+                                                {tier.requestsLabel} requests
                                             </p>
                                         </div>
                                         {isCurrent && <Badge variant="success">Active</Badge>}

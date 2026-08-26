@@ -1,23 +1,29 @@
 import { baseApi } from './index';
+import billingContract from '../../../data/contracts/billing.json';
+import type {
+    BillingDocument,
+    CheckoutRequest,
+    RedirectDocument,
+} from '@/entities/billing/billingTypes';
 
 export const billingApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        getBilling: builder.query({
-            query: () => 'api/billing',
+        getBilling: builder.query<BillingDocument, void>({
+            query: () => billingContract.routes.billing,
             providesTags: ['Billing'],
         }),
-        createCheckout: builder.mutation({
+        createCheckout: builder.mutation<RedirectDocument, CheckoutRequest>({
             query: (plan) => ({
-                url: 'api/billing',
-                method: 'POST',
+                url: billingContract.routes.billing,
+                method: billingContract.methods.create,
                 body: plan,
             }),
             invalidatesTags: ['Billing'],
         }),
-        openPortal: builder.mutation({
+        openPortal: builder.mutation<RedirectDocument, void>({
             query: () => ({
-                url: 'api/billing/portal',
-                method: 'POST',
+                url: billingContract.routes.portal,
+                method: billingContract.methods.create,
             }),
             invalidatesTags: ['Billing'],
         }),

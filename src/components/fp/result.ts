@@ -36,3 +36,11 @@ export const matchNullable = <Value, Output>(
 
 export const attempt = <Value>(effect: () => Promise<Value>): Promise<Result<unknown, Value>> =>
     effect().then(success).catch(failure);
+
+export const attemptSync = <Value>(effect: () => Value): Result<unknown, Value> => {
+    try {
+        return success(effect());
+    } catch (error) {
+        return failure(error);
+    }
+};

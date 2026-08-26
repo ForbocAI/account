@@ -39,17 +39,29 @@ model ApiKey {
 }
 
 model Subscription {
-  id                   String    @id @default(cuid())
-  userId               String    @unique @map("user_id")
-  stripeSubscriptionId String    @unique @map("stripe_subscription_id")
-  stripePriceId        String    @map("stripe_price_id")
-  status               String    @default("active")
-  currentPeriodStart   DateTime  @map("current_period_start")
-  currentPeriodEnd     DateTime  @map("current_period_end")
-  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
-  createdAt            DateTime  @default(now()) @map("created_at")
-  updatedAt            DateTime  @updatedAt @map("updated_at")
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String   @id @default(cuid())
+  userId               String   @unique @map("user_id")
+  stripeSubscriptionId String   @unique @map("stripe_subscription_id")
+  stripePriceId        String   @map("stripe_price_id")
+  status               String   @default("active")
+  currentPeriodStart   DateTime @map("current_period_start")
+  currentPeriodEnd     DateTime @map("current_period_end")
+  cancelAtPeriodEnd    Boolean  @default(false) @map("cancel_at_period_end")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+model StripeWebhookEvent {
+  id             String   @id
+  eventType      String   @map("event_type")
+  eventCreatedAt DateTime @map("event_created_at")
+  subscriptionId String?  @map("subscription_id")
+  outcome        String
+  processedAt    DateTime @default(now()) @map("processed_at")
+
+  @@index([subscriptionId, eventCreatedAt])
+  @@map("stripe_webhook_events")
 }

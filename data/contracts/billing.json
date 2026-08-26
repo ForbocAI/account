@@ -1,0 +1,94 @@
+{
+  "routes": {
+    "billing": "api/billing",
+    "portal": "api/billing/portal",
+    "webhook": "api/webhooks/stripe"
+  },
+  "methods": {
+    "create": "POST"
+  },
+  "headers": {
+    "stripeSignature": "stripe-signature"
+  },
+  "environment": {
+    "stripeSecret": "STRIPE_SECRET_KEY",
+    "webhookSecret": "STRIPE_WEBHOOK_SECRET",
+    "applicationUrl": "NEXT_PUBLIC_APP_URL",
+    "defaultApplicationUrl": "https://console.forboc.ai"
+  },
+  "events": {
+    "checkoutCompleted": "checkout.session.completed",
+    "subscriptionUpdated": "customer.subscription.updated",
+    "subscriptionDeleted": "customer.subscription.deleted"
+  },
+  "objects": {
+    "checkoutSession": "checkout.session",
+    "subscription": "subscription"
+  },
+  "actions": {
+    "upsert": "upsert",
+    "cancel": "cancel",
+    "ignore": "ignore"
+  },
+  "outcomes": {
+    "applied": "applied",
+    "duplicate": "duplicate",
+    "stale": "stale",
+    "ignored": "ignored"
+  },
+  "statuses": {
+    "canceled": "canceled"
+  },
+  "checkout": {
+    "mode": "subscription",
+    "quantity": 1,
+    "successPath": "/billing?success=true",
+    "cancelPath": "/billing?canceled=true",
+    "portalReturnPath": "/billing"
+  },
+  "time": {
+    "millisecondsPerSecond": 1000
+  },
+  "messages": {
+    "missingSignature": "Missing Stripe signature or webhook configuration",
+    "invalidSignature": "Invalid Stripe signature",
+    "processingFailed": "Webhook processing failed",
+    "checkoutFailed": "Failed to create checkout session",
+    "portalFailed": "Failed to open billing portal",
+    "billingLoadFailed": "Unable to load authoritative billing state",
+    "invalidPlan": "Invalid plan selected",
+    "userNotFound": "User not found",
+    "billingAccountNotFound": "No billing account found"
+  },
+  "defaultPlan": "free",
+  "plans": [
+    {
+      "key": "free",
+      "name": "Initiate",
+      "price": "Free",
+      "requestsPerDay": 1000,
+      "requestsLabel": "1,000 / day",
+      "priceEnvironment": null,
+      "features": ["1 API Key", "Community support", "Basic analytics"]
+    },
+    {
+      "key": "pro",
+      "name": "Operative",
+      "price": "$49/mo",
+      "requestsPerDay": 50000,
+      "requestsLabel": "50,000 / day",
+      "priceEnvironment": "STRIPE_PRO_PRICE_ID",
+      "features": ["Unlimited API Keys", "Priority support", "Advanced analytics", "Webhook access"],
+      "highlighted": true
+    },
+    {
+      "key": "enterprise",
+      "name": "Architect",
+      "price": "$299/mo",
+      "requestsPerDay": -1,
+      "requestsLabel": "Unlimited",
+      "priceEnvironment": "STRIPE_ENTERPRISE_PRICE_ID",
+      "features": ["Unlimited everything", "Dedicated support", "Custom SLAs", "On-prem deployment"]
+    }
+  ]
+}

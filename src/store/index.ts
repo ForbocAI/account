@@ -3,17 +3,14 @@ import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, 
 import storage from 'redux-persist/lib/storage';
 import authReducer from './slices/authSlice';
 import uiReducer from './slices/uiSlice';
-import billingReducer from './slices/billingSlice';
 import formReducer from './slices/formSlice';
 import { baseApi } from './api';
 
-import { billingListener } from './middleware/billingListener';
 import logger from 'redux-logger';
 
 const rootReducer = combineReducers({
     auth: authReducer,
     ui: uiReducer,
-    billing: billingReducer,
     form: formReducer,
     [baseApi.reducerPath]: baseApi.reducer,
 });
@@ -22,7 +19,7 @@ const persistConfig = {
     key: 'root',
     version: 1,
     storage,
-    whitelist: ['auth', 'billing'], // Only persist these
+    whitelist: ['auth'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -35,8 +32,7 @@ export const store = configureStore({
                 ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
             },
         })
-            .concat(baseApi.middleware)
-            .prepend(billingListener.middleware);
+            .concat(baseApi.middleware);
 
         return process.env.NODE_ENV === 'development'
             ? middleware.concat(logger as Middleware)
