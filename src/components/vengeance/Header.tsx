@@ -6,20 +6,26 @@ import { LogOut } from "lucide-react";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
+import { baseApi } from "@/store/api";
+import { useLogoutMutation } from "@/store/api/authApi";
+import authContract from "../../../data/contracts/auth.json";
 
-const AUTH_ROUTES = ["/", "/signup"];
+const AUTH_ROUTES = [authContract.routes.home, authContract.routes.signupPage];
 
 export const Header = () => {
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.auth.user);
     const pathname = usePathname();
     const router = useRouter();
+    const [terminateSession, { isLoading: logoutPending }] = useLogoutMutation();
     const isAuth = AUTH_ROUTES.includes(pathname);
 
     const handleLogout = async () => {
-        await fetch("/api/auth/logout", { method: "POST" });
+        await terminateSession().unwrap();
         dispatch(logout());
-        router.push("/");
+        dispatch(baseApi.util.resetApiState());
+        router.replace(authContract.routes.home);
+        router.refresh();
     };
 
     return (
@@ -39,6 +45,7 @@ export const Header = () => {
                         <a href="/billing" className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Billing</a>
                         <button
                             onClick={handleLogout}
+                            disabled={logoutPending}
                             className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600 hover:text-red-500 transition-colors flex items-center gap-1.5"
                         >
                             <LogOut className="w-3 h-3" />

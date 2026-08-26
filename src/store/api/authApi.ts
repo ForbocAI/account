@@ -1,33 +1,39 @@
 import { baseApi } from './index';
+import authContract from '../../../data/contracts/auth.json';
+import type {
+    AuthCredentials,
+    AuthDocument,
+    LogoutDocument,
+} from '@/entities/auth/authTypes';
 
 export const authApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        login: builder.mutation({
+        login: builder.mutation<AuthDocument, AuthCredentials>({
             query: (credentials) => ({
-                url: 'api/auth/login',
-                method: 'POST',
+                url: authContract.routes.loginApi,
+                method: authContract.methods.create,
                 body: credentials,
             }),
-            invalidatesTags: ['User'],
+            invalidatesTags: ['User', 'Session'],
         }),
-        signup: builder.mutation({
+        signup: builder.mutation<AuthDocument, AuthCredentials>({
             query: (user) => ({
-                url: 'api/auth/signup',
-                method: 'POST',
+                url: authContract.routes.signupApi,
+                method: authContract.methods.create,
                 body: user,
             }),
-            invalidatesTags: ['User'],
+            invalidatesTags: ['User', 'Session'],
         }),
-        logout: builder.mutation({
+        logout: builder.mutation<LogoutDocument, void>({
             query: () => ({
-                url: 'api/auth/logout',
-                method: 'POST',
+                url: authContract.routes.logoutApi,
+                method: authContract.methods.create,
             }),
-            invalidatesTags: ['User'],
+            invalidatesTags: ['User', 'Session'],
         }),
-        getMe: builder.query({
-            query: () => 'api/auth/me',
-            providesTags: ['User'],
+        getMe: builder.query<AuthDocument, void>({
+            query: () => authContract.routes.meApi,
+            providesTags: ['User', 'Session'],
         }),
     }),
 });

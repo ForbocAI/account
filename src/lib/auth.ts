@@ -47,7 +47,7 @@ export function clearAuthCookie(response: NextResponse): void {
     secure: process.env.NODE_ENV === "production",
     sameSite: authContract.cookie.sameSite as "lax",
     path: authContract.cookie.path,
-    maxAge: 0,
+    maxAge: authContract.cookie.clearMaxAgeSeconds,
   });
 }
 

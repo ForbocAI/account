@@ -5,6 +5,7 @@ import authRateLimitContract from '../../../data/contracts/auth-rate-limit.json'
 import httpContract from '../../../data/contracts/http.json';
 import fixture from '../../../data/tests/auth.json';
 import { POST as login } from '@/app/api/auth/login/route';
+import { POST as logout } from '@/app/api/auth/logout/route';
 import { POST as signup } from '@/app/api/auth/signup/route';
 import { createPostgresAuthRateLimitProvider } from '@/components/auth/postgresAuthRateLimitProvider';
 import { hashPassword } from '@/lib/password';
@@ -34,6 +35,14 @@ describe(fixture.cases.route, () => {
         expect(response.status).toBe(httpContract.status.ok);
         expect(response.headers.get(fixture.headers.setCookie)).toContain(authContract.cookie.name);
         expect((await response.json()).user.email).toBe(fixture.user.email);
+    });
+
+    it(fixture.cases.logout, async () => {
+        const response = await logout();
+        const cookie = response.headers.get(fixture.headers.setCookie);
+        expect(response.status).toBe(httpContract.status.ok);
+        expect(cookie).toContain(`${authContract.cookie.name}=`);
+        expect(cookie).toContain(`Max-Age=${authContract.cookie.clearMaxAgeSeconds}`);
     });
 
     it(fixture.cases.signup, async () => {
