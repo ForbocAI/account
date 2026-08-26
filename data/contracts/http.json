@@ -1,0 +1,21 @@
+{
+  "status": {
+    "ok": 200,
+    "created": 201,
+    "badRequest": 400,
+    "unauthorized": 401,
+    "notFound": 404,
+    "conflict": 409,
+    "tooManyRequests": 429,
+    "internalServerError": 500,
+    "serviceUnavailable": 503
+  },
+  "errors": {
+    "unauthorized": "Unauthorized",
+    "invalidJson": "Request body must be valid JSON",
+    "internalServer": "Internal server error",
+    "keyNameRequired": "Key name is required",
+    "keyNotFound": "Key not found",
+    "keyAlreadyRevoked": "Key is already revoked"
+  }
+}

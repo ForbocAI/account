@@ -1,60 +1,58 @@
 import { describe, it, expect } from 'vitest';
+import { createHash } from 'crypto';
+import apiKeyContract from '../../../data/contracts/api-keys.json';
+import httpContract from '../../../data/contracts/http.json';
+import fixtures from '../../../data/tests/api-keys.json';
+import { apiKeyPersistence } from '@/components/apiKeys/apiKeyPersistence';
+import { createApiKeyRoutes } from '@/systems/apiKeys/apiKeyRoutes';
 import { prisma } from './setup';
-import crypto from 'crypto';
 
-describe('API Key Management Integration', () => {
-    it('should create and verify an API key for a user', async () => {
-        // 1. Setup user
+describe(fixtures.suite, () => {
+    it(fixtures.cases.create, async () => {
         const user = await prisma.user.create({
-            data: { email: 'keys@forboc.ai', passwordHash: 'hash' },
+            data: fixtures.user,
         });
-
-        // 2. Simulate key generation logic
-        const rawKey = `fb_${crypto.randomBytes(32).toString('hex')}`;
-        const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
-        const keyPrefix = rawKey.slice(0, 6);
-
-        const apiKey = await prisma.apiKey.create({
-            data: {
-                userId: user.id,
-                name: 'Production Key',
-                keyHash: keyHash,
-                keyPrefix: keyPrefix,
-            },
+        const routes = createApiKeyRoutes({
+            readSession: async () => ({ userId: user.id }),
+            persistence: apiKeyPersistence,
+            randomHex: () => fixtures.generated.hex,
+            hash: (value) => createHash(apiKeyContract.generation.hashAlgorithm)
+                .update(value)
+                .digest(apiKeyContract.generation.encoding as 'hex'),
         });
+        const response = await routes.create({ json: async () => fixtures.requests.valid });
+        const body = await response.json();
+        const keyHash = createHash(apiKeyContract.generation.hashAlgorithm)
+            .update(body.key.rawKey)
+            .digest(apiKeyContract.generation.encoding as 'hex');
+        const stored = await prisma.apiKey.findUnique({ where: { keyHash } });
 
-        // 3. Verify persistence
-        expect(apiKey.userId).toBe(user.id);
-        expect(apiKey.keyPrefix.startsWith('fb_')).toBe(true);
-        expect(apiKey.status).toBe('active');
-
-        // 4. Verify lookup by hash
-        const found = await prisma.apiKey.findUnique({
-            where: { keyHash },
-        });
-        expect(found?.id).toBe(apiKey.id);
+        expect(response.status).toBe(httpContract.status.created);
+        expect(stored?.userId).toBe(user.id);
+        expect(stored?.status).toBe(apiKeyContract.status.active);
+        expect(stored).not.toHaveProperty('rawKey');
     });
 
-    it('should revoke an API key', async () => {
+    it(fixtures.cases.revoke, async () => {
         const user = await prisma.user.create({
-            data: { email: 'revoke@forboc.ai', passwordHash: 'hash' },
+            data: fixtures.user,
         });
 
         const apiKey = await prisma.apiKey.create({
             data: {
                 userId: user.id,
-                name: 'Temp Key',
-                keyHash: 'some-hash',
-                keyPrefix: 'fb_tmp',
+                name: fixtures.requests.valid.name,
+                keyHash: fixtures.generated.hash,
+                keyPrefix: apiKeyContract.generation.prefix,
             },
         });
 
         const revoked = await prisma.apiKey.update({
             where: { id: apiKey.id },
-            data: { status: 'revoked', revokedAt: new Date() },
+            data: { status: apiKeyContract.status.revoked, revokedAt: new Date() },
         });
 
-        expect(revoked.status).toBe('revoked');
+        expect(revoked.status).toBe(apiKeyContract.status.revoked);
         expect(revoked.revokedAt).toBeDefined();
     });
 });

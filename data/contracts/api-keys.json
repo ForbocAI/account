@@ -1,0 +1,18 @@
+{
+  "generation": {
+    "prefix": "fb_live_",
+    "entropyBytes": 16,
+    "encoding": "hex",
+    "hashAlgorithm": "sha256",
+    "visiblePrefixCharacters": 8,
+    "visibleSuffixCharacters": 4,
+    "mask": "******************"
+  },
+  "status": {
+    "active": "active",
+    "revoked": "revoked"
+  },
+  "ordering": {
+    "createdAt": "desc"
+  }
+}

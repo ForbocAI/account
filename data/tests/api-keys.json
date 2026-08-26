@@ -1,0 +1,37 @@
+{
+  "suite": "API key route contract",
+  "cases": {
+    "unauthorized": "returns 401 when no authenticated session exists",
+    "invalidName": "returns 400 for an empty key name",
+    "list": "returns 200 with the authenticated account keys",
+    "create": "returns 201 and reveals the raw key once",
+    "failure": "returns a controlled 500 response for persistence failure",
+    "revoke": "revokes an owned active key"
+  },
+  "session": {
+    "userId": "account-key-user"
+  },
+  "user": {
+    "email": "keys-contract@forboc.ai",
+    "passwordHash": "authored-test-password-hash"
+  },
+  "requests": {
+    "valid": {
+      "name": "Production Key"
+    },
+    "invalid": {
+      "name": "   "
+    }
+  },
+  "generated": {
+    "hex": "0123456789abcdef0123456789abcdef",
+    "hash": "authored-deterministic-key-hash"
+  },
+  "record": {
+    "id": "account-key-record",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  "failure": {
+    "message": "authored persistence failure"
+  }
+}
