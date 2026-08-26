@@ -1,9 +1,8 @@
 import { hash, compare } from "bcryptjs";
-
-const BCRYPT_ROUNDS = 12;
+import authContract from "../../data/contracts/auth.json";
 
 export async function hashPassword(password: string): Promise<string> {
-    return hash(password, BCRYPT_ROUNDS);
+    return hash(password, authContract.password.hashRounds);
 }
 
 export async function verifyPassword(

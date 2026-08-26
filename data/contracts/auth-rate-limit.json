@@ -1,0 +1,43 @@
+{
+  "provider": {
+    "environment": "AUTH_RATE_LIMIT_PROVIDER",
+    "postgres": "postgres",
+    "local": "local",
+    "default": "postgres"
+  },
+  "identity": {
+    "hashSecretEnvironment": "AUTH_RATE_LIMIT_HASH_SECRET",
+    "hashAlgorithm": "sha256",
+    "separator": ":",
+    "anonymous": "unresolved-client",
+    "forwardedForHeader": "x-forwarded-for",
+    "realIpHeader": "x-real-ip",
+    "trustedProxyHopsEnvironment": "AUTH_RATE_LIMIT_TRUSTED_PROXY_HOPS",
+    "defaultTrustedProxyHops": 1
+  },
+  "policies": {
+    "login": {
+      "scope": "login",
+      "limit": 5,
+      "windowMilliseconds": 60000
+    },
+    "signup": {
+      "scope": "signup",
+      "limit": 3,
+      "windowMilliseconds": 300000
+    }
+  },
+  "providerTimeoutMilliseconds": 750,
+  "minimumRetryAfterSeconds": 1,
+  "unavailableRetryAfterSeconds": 5,
+  "millisecondsPerSecond": 1000,
+  "headers": {
+    "retryAfter": "Retry-After"
+  },
+  "messages": {
+    "limited": "Too many authentication attempts",
+    "unavailable": "Authentication protection is temporarily unavailable",
+    "timeout": "Auth rate-limit provider timeout",
+    "persistenceEmpty": "Auth rate-limit persistence returned no row"
+  }
+}

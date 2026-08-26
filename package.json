@@ -11,6 +11,7 @@
     "start": "next start",
     "test": "vitest",
     "test:integration": "vitest --config vitest.config.integration.mjs",
+    "check:data": "node scripts/check-data-contracts.mjs",
     "verify:all": "bash scripts/verify-all.sh",
     "postinstall": "prisma generate"
   },

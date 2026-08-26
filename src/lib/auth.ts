@@ -1,20 +1,22 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import authContract from "../../data/contracts/auth.json";
 
-const COOKIE_NAME = "forboc_session";
-const JWT_EXPIRY = "7d";
+const COOKIE_NAME = authContract.cookie.name;
 
 function getJwtSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET;
-  return secret ? new TextEncoder().encode(secret) : (() => { throw new Error("JWT_SECRET environment variable is not set"); })();
+  const secret = process.env[authContract.jwt.secretEnvironment];
+  return secret
+    ? new TextEncoder().encode(secret)
+    : (() => { throw new Error(`${authContract.jwt.secretEnvironment} is not set`); })();
 }
 
 export async function createToken(userId: string): Promise<string> {
   return new SignJWT({ sub: userId })
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: authContract.jwt.algorithm })
     .setIssuedAt()
-    .setExpirationTime(JWT_EXPIRY)
+    .setExpirationTime(authContract.jwt.expiry)
     .sign(getJwtSecret());
 }
 
@@ -33,9 +35,9 @@ export function setAuthCookie(response: NextResponse, token: string): void {
   response.cookies.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    sameSite: authContract.cookie.sameSite as "lax",
+    path: authContract.cookie.path,
+    maxAge: authContract.cookie.maxAgeSeconds,
   });
 }
 
@@ -43,8 +45,8 @@ export function clearAuthCookie(response: NextResponse): void {
   response.cookies.set(COOKIE_NAME, "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    sameSite: authContract.cookie.sameSite as "lax",
+    path: authContract.cookie.path,
     maxAge: 0,
   });
 }
