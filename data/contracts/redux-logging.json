@@ -1,0 +1,11 @@
+{
+  "environment": "NEXT_PUBLIC_ACCOUNT_REDUX_LOGGING",
+  "enabledValue": "enabled",
+  "developmentEnvironment": "development",
+  "logger": {
+    "collapsed": true,
+    "duration": true,
+    "timestamp": false,
+    "diff": false
+  }
+}

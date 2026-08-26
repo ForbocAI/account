@@ -1,0 +1,75 @@
+{
+  "cases": {
+    "suite": "safe Redux diagnostics",
+    "action": "reports protocol lifecycle without payload values",
+    "state": "reports state shape without account values"
+  },
+  "sensitive": {
+    "email": "private-account@forboc.invalid",
+    "password": "NeverLogThisPassword!",
+    "rawKey": "fb_live_never_log_this_key",
+    "token": "never-log-this-session-token"
+  },
+  "action": {
+    "type": "api/executeMutation/fulfilled",
+    "meta": {
+      "requestStatus": "fulfilled",
+      "arg": {
+        "endpointName": "login",
+        "originalArgs": {
+          "email": "private-account@forboc.invalid",
+          "password": "NeverLogThisPassword!"
+        }
+      }
+    },
+    "payload": {
+      "rawKey": "fb_live_never_log_this_key",
+      "token": "never-log-this-session-token"
+    }
+  },
+  "state": {
+    "auth": {
+      "user": {
+        "email": "private-account@forboc.invalid"
+      },
+      "isAuthenticated": true
+    },
+    "form": {
+      "login": {
+        "loading": false,
+        "error": null
+      },
+      "signup": {
+        "loading": false,
+        "error": null
+      },
+      "keys": {
+        "creating": false,
+        "showModal": true,
+        "revealedKey": "fb_live_never_log_this_key",
+        "error": null
+      },
+      "billing": {
+        "portalLoading": false,
+        "upgrading": null,
+        "error": null
+      }
+    },
+    "api": {
+      "queries": {
+        "getMe": {
+          "data": {
+            "email": "private-account@forboc.invalid"
+          }
+        }
+      },
+      "mutations": {
+        "login": {
+          "originalArgs": {
+            "password": "NeverLogThisPassword!"
+          }
+        }
+      }
+    }
+  }
+}

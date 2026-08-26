@@ -1,4 +1,4 @@
-import { configureStore, combineReducers, Middleware } from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from './slices/authSlice';
@@ -6,7 +6,10 @@ import uiReducer from './slices/uiSlice';
 import formReducer from './slices/formSlice';
 import { baseApi } from './api';
 
-import logger from 'redux-logger';
+import {
+    safeReduxLogger,
+    safeReduxLoggingEnabled,
+} from '@/components/state/safeReduxLogger';
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -34,8 +37,8 @@ export const store = configureStore({
         })
             .concat(baseApi.middleware);
 
-        return process.env.NODE_ENV === 'development'
-            ? middleware.concat(logger as Middleware)
+        return safeReduxLoggingEnabled()
+            ? middleware.concat(safeReduxLogger)
             : middleware;
     },
 });
