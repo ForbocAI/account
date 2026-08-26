@@ -1,47 +1,47 @@
 import { describe, it, expect } from 'vitest';
+import fixture from '../../../../data/tests/state.json';
 import formReducer, {
     setLoginEmail,
     setLoginError,
     resetForm
 } from '../formSlice';
+import type { FormStateKey } from '../formSlice';
 
-describe('formSlice', () => {
-    const initialState = {
-        login: { email: '', loading: false, error: null },
-        signup: { email: '', loading: false, error: null },
-        keys: { newKeyName: '', showModal: false, revealedKey: null, creating: false, error: null },
-        billing: { upgrading: null, portalLoading: false, error: null },
-    };
+describe(fixture.form.suite, () => {
+    const initialState = fixture.form.initialState;
 
-    it('should handle initial state', () => {
-        expect(formReducer(undefined, { type: 'unknown' })).toEqual(initialState);
+    it(fixture.form.cases.initial, () => {
+        expect(formReducer(undefined, { type: fixture.action.unknownType })).toEqual(initialState);
     });
 
-    describe('Given login form state', () => {
-        describe('When setLoginEmail is dispatched', () => {
-            it('Then it should update the login email', () => {
-                const nextState = formReducer(initialState, setLoginEmail('test@forboc.ai'));
-                expect(nextState.login.email).toBe('test@forboc.ai');
+    describe(fixture.form.cases.login, () => {
+        describe(fixture.form.cases.email, () => {
+            it(fixture.form.cases.email, () => {
+                const nextState = formReducer(initialState, setLoginEmail(fixture.form.login.email));
+                expect(nextState.login.email).toBe(fixture.form.login.email);
             });
         });
 
-        describe('When setLoginError is dispatched', () => {
-            it('Then it should update the login error', () => {
-                const nextState = formReducer(initialState, setLoginError('Invalid credentials'));
-                expect(nextState.login.error).toBe('Invalid credentials');
+        describe(fixture.form.cases.error, () => {
+            it(fixture.form.cases.error, () => {
+                const nextState = formReducer(initialState, setLoginError(fixture.form.login.error));
+                expect(nextState.login.error).toBe(fixture.form.login.error);
             });
         });
     });
 
-    describe('Given dirty form state', () => {
+    describe(fixture.form.cases.dirty, () => {
         const dirtyState = {
             ...initialState,
-            login: { email: 'bad@dev.com', loading: true, error: 'error' }
+            login: fixture.form.dirtyLogin,
         };
 
-        describe('When resetForm("login") is dispatched', () => {
-            it('Then it should reset only the login form state', () => {
-                const nextState = formReducer(dirtyState, resetForm('login'));
+        describe(fixture.form.cases.reset, () => {
+            it(fixture.form.cases.reset, () => {
+                const nextState = formReducer(
+                    dirtyState,
+                    resetForm(fixture.form.scope as FormStateKey),
+                );
                 expect(nextState.login).toEqual(initialState.login);
             });
         });

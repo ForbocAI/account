@@ -6,6 +6,17 @@
   "signature": "fixture-signature",
   "invalidSignature": "invalid-fixture-signature",
   "failure": "fixture-processing-failure",
+  "instructionKinds": {
+    "hydrateCheckout": "hydrate-checkout",
+    "applySubscription": "apply-subscription",
+    "ignore": "ignore"
+  },
+  "sequence": {
+    "firstIndex": 0
+  },
+  "counts": {
+    "none": 0
+  },
   "cases": {
     "projection": "Stripe event projection",
     "checkout": "hydrates checkout into an authoritative subscription command",
@@ -33,6 +44,7 @@
     "priceId": "price_account_fixture",
     "planKey": "pro",
     "status": "active",
+    "cancelAtPeriodEnd": false,
     "currentPeriodStart": 1787702400,
     "currentPeriodEnd": 1790380800
   },

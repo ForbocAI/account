@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest';
 import type Stripe from 'stripe';
 import billingContract from '../../../../data/contracts/billing.json';
 import fixture from '../../../../data/tests/billing-webhooks.json';
+import type {
+    ApplySubscriptionInstruction,
+    HydrateCheckoutInstruction,
+    IgnoreWebhookInstruction,
+} from '@/entities/billing/billingTypes';
 import {
     hydrateCheckout,
     instructionToCommand,
@@ -17,7 +22,7 @@ const subscription = (status = fixture.subscription.status): Stripe.Subscription
         planKey: fixture.subscription.planKey,
     },
     status,
-    cancel_at_period_end: false,
+    cancel_at_period_end: fixture.subscription.cancelAtPeriodEnd,
     items: {
         data: [{
             price: { id: fixture.subscription.priceId },
@@ -52,12 +57,12 @@ describe(fixture.cases.projection, () => {
         );
 
         const instruction = projectStripeEvent(checkoutEvent);
-        expect(instruction.kind).toBe('hydrate-checkout');
-        if (instruction.kind !== 'hydrate-checkout') {
-            return;
-        }
+        expect(instruction.kind).toBe(fixture.instructionKinds.hydrateCheckout);
 
-        const command = hydrateCheckout(instruction, subscription());
+        const command = hydrateCheckout(
+            instruction as HydrateCheckoutInstruction,
+            subscription(),
+        );
         expect(command.action).toBe(billingContract.actions.upsert);
         expect(command.projection?.planKey).toBe(fixture.subscription.planKey);
         expect(command.subscriptionId).toBe(fixture.subscription.id);
@@ -71,12 +76,9 @@ describe(fixture.cases.projection, () => {
             subscription(fixture.events.newerUpdate.status),
         ));
 
-        expect(update.kind).toBe('apply-subscription');
-        if (update.kind !== 'apply-subscription') {
-            return;
-        }
+        expect(update.kind).toBe(fixture.instructionKinds.applySubscription);
 
-        const command = instructionToCommand(update);
+        const command = instructionToCommand(update as ApplySubscriptionInstruction);
         expect(command.action).toBe(billingContract.actions.upsert);
         expect(command.projection?.status).toBe(fixture.events.newerUpdate.status);
     });
@@ -89,10 +91,9 @@ describe(fixture.cases.projection, () => {
             {},
         ));
 
-        expect(unknown.kind).toBe('ignore');
-        if (unknown.kind !== 'ignore') {
-            return;
-        }
-        expect(instructionToCommand(unknown).subscriptionId).toBeNull();
+        expect(unknown.kind).toBe(fixture.instructionKinds.ignore);
+        expect(instructionToCommand(
+            unknown as IgnoreWebhookInstruction,
+        ).subscriptionId).toBeNull();
     });
 });

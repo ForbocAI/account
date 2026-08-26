@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
+import authContract from "../../data/contracts/auth.json";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/authSlice";
 import { setLoginEmail, setLoginError, resetForm, selectLoginForm } from "@/store/slices/formSlice";
+import type { FormStateKey } from "@/store/slices/formSlice";
 import { useLoginMutation } from "@/store/api/authApi";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/vengeance/Card";
 import { Button } from "@/components/vengeance/Button";
@@ -26,20 +28,17 @@ export default function LoginPage() {
     e.preventDefault();
     dispatch(setLoginError(null));
 
-    // Get password directly from form element to avoid persisting sensitive data in Redux if possible,
-    // though the standard says "ALL state must go through Redux". 
-    // To be strictly compliant with "ALL state in Redux", I should have used Redux for password too.
     const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const password = formData.get("password") as string;
+    const password = formData.get(authContract.interaction.passwordField) as string;
 
     try {
       const result = await login({ email, password }).unwrap();
       dispatch(setCredentials(result.user));
-      dispatch(resetForm("login"));
-      router.push("/dashboard");
+      dispatch(resetForm(authContract.interaction.loginFormScope as FormStateKey));
+      router.replace(authContract.routes.dashboard);
     } catch (err: unknown) {
       const error = err as { data?: { error?: string } };
-      dispatch(setLoginError(error.data?.error || "Authentication failed"));
+      dispatch(setLoginError(error.data?.error || authContract.messages.loginFailed));
     }
   };
 

@@ -3,6 +3,7 @@ import path from 'node:path';
 import ts from 'typescript';
 
 const root = path.resolve(import.meta.dirname, '..');
+const sourceRoot = path.join(root, 'src');
 const authContract = JSON.parse(fs.readFileSync(
     path.join(root, 'data/contracts/auth.json'),
     'utf8',
@@ -69,6 +70,49 @@ collectEnvironmentNames(loggingSource);
 
 if (!publicEnvironmentNames.includes(loggingContract.environment)) {
     throw new Error('Safe Redux logger environment mirror must match its JSON contract');
+}
+
+const sourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true })
+    .flatMap((entry) => entry.isDirectory()
+        ? sourceFiles(path.join(directory, entry.name))
+        : [path.join(directory, entry.name)]);
+
+const testFiles = sourceFiles(sourceRoot).filter((file) =>
+    /\.(?:test|spec)\.[cm]?[jt]sx?$/.test(file));
+
+const isModuleSpecifier = (node) => (
+    ts.isImportDeclaration(node.parent)
+    || ts.isExportDeclaration(node.parent)
+) && node.parent.moduleSpecifier === node;
+
+const authoredTestValues = testFiles.flatMap((file) => {
+    const source = ts.createSourceFile(
+        file,
+        fs.readFileSync(file, 'utf8'),
+        ts.ScriptTarget.Latest,
+        true,
+        file.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+    );
+    const violations = [];
+    const inspect = (node) => {
+        const authoredString = ts.isStringLiteralLike(node) && !isModuleSpecifier(node);
+        const authoredNumber = ts.isNumericLiteral(node) || ts.isBigIntLiteral(node);
+        if (authoredString || authoredNumber) {
+            const location = source.getLineAndCharacterOfPosition(node.getStart(source));
+            violations.push(
+                `${path.relative(root, file)}:${location.line + 1}:${location.character + 1}`,
+            );
+        }
+        ts.forEachChild(node, inspect);
+    };
+    inspect(source);
+    return violations;
+});
+
+if (authoredTestValues.length > 0) {
+    throw new Error(
+        `Test source contains authored string or number values; move them to data/tests JSON:\n${authoredTestValues.join('\n')}`,
+    );
 }
 
 console.log('Static framework mirrors match their authored JSON contracts.');

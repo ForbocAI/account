@@ -1,0 +1,77 @@
+{
+  "environmentFiles": [
+    ".env",
+    ".env.local",
+    ".env.example"
+  ],
+  "statuses": {
+    "success": 0,
+    "failure": 1
+  },
+  "generatedBoundary": {
+    "source": "src/generated",
+    "hidden": ".verification/generated"
+  },
+  "layout": {
+    "roots": ["src", "data", "scripts", "prisma"],
+    "excludedDirectories": [".git", ".next", ".verification", "generated", "node_modules"],
+    "extensions": [".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs", ".json", ".py", ".sh", ".sql", ".prisma", ".toml"],
+    "maximumLines": 300,
+    "maximumDirectSubdomains": 7
+  },
+  "architecture": {
+    "classifiedCandidates": ["../classified", "classified-checkout"],
+    "guards": {
+      "fp": {
+        "script": "scripts/check-fp-conformance.sh",
+        "target": {
+          "kind": "sourceFiles",
+          "root": "src",
+          "extensions": [".ts", ".tsx"]
+        },
+        "strictWarningPrefixes": [
+          "[warn] raw if statements found",
+          "[warn] direct null/undefined comparisons found",
+          "[warn] array push() accumulation found",
+          "[warn] imperative loop statements found",
+          "[warn] var declarations found",
+          "[warn] class declarations found",
+          "[warn] switch statements found",
+          "[warn] else-if chains found"
+        ]
+      },
+      "rtk": {
+        "script": "scripts/check-rtk-conformance.sh",
+        "target": {
+          "kind": "repository"
+        },
+        "strictWarningPrefixes": []
+      }
+    },
+    "messages": {
+      "unavailable": "Classified architecture guards are unavailable.",
+      "unknownMode": "Unknown architecture guard mode."
+    }
+  },
+  "database": {
+    "commandCandidates": ["docker.exe", "docker"],
+    "versionArguments": ["version"],
+    "startupArguments": ["compose", "up", "-d", "db"],
+    "migrationCommand": "npx",
+    "migrationArguments": ["prisma", "migrate", "deploy"]
+  },
+  "stages": [
+    {"id": "prisma", "label": "Prisma client generation", "command": "npx", "arguments": ["prisma", "generate"]},
+    {"id": "data", "label": "Authored data contracts", "command": "npm", "arguments": ["run", "check:data"]},
+    {"id": "layout", "label": "Line-count and concern fan-out", "command": "npm", "arguments": ["run", "check:layout"]},
+    {"id": "fp", "label": "Functional composition", "command": "bash", "arguments": ["scripts/verification/run-classified-guard.sh", "fp"], "hideGenerated": true},
+    {"id": "rtk", "label": "Redux Toolkit ownership", "command": "bash", "arguments": ["scripts/verification/run-classified-guard.sh", "rtk"], "hideGenerated": true},
+    {"id": "types", "label": "TypeScript", "command": "npm", "arguments": ["run", "typecheck"]},
+    {"id": "lint", "label": "ESLint zero-warning policy", "command": "npm", "arguments": ["run", "lint"]},
+    {"id": "unit", "label": "Unit and contract tests", "command": "npm", "arguments": ["test", "--", "--run"]},
+    {"id": "database", "label": "PostgreSQL migrations", "command": "node", "arguments": ["scripts/verification/prepare-database.mjs"]},
+    {"id": "integration", "label": "Database route integration", "command": "npm", "arguments": ["run", "test:integration", "--", "--run"]},
+    {"id": "audit", "label": "Dependency audit", "command": "npm", "arguments": ["audit", "--audit-level=low"]},
+    {"id": "build", "label": "Next.js production build", "command": "npm", "arguments": ["run", "build"]}
+  ]
+}

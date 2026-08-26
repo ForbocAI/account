@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
 import billingContract from '../../../data/contracts/billing.json';
+import { matchNullable } from '@/components/fp/result';
 import { defaultBillingPlan, findBillingPlan } from '@/components/billing/billingCatalog';
 import type {
     BillingWebhookCommand,
@@ -17,15 +18,10 @@ const resolveProjectionUser = async (
     const direct = projection.userId
         ? await transaction.user.findUnique({ where: { id: projection.userId } })
         : await transaction.user.findUnique({ where: { stripeCustomerId: projection.customerId } });
-    if (direct) {
-        return direct;
-    }
-
-    const subscription = await transaction.subscription.findUnique({
+    return direct ?? (await transaction.subscription.findUnique({
         where: { stripeSubscriptionId: projection.subscriptionId },
         include: { user: true },
-    });
-    return subscription?.user ?? null;
+    }))?.user ?? null;
 };
 
 const subscriptionValues = (projection: SubscriptionProjection) => ({
@@ -42,27 +38,28 @@ const upsertSubscription = async (
     projection: SubscriptionProjection,
 ): Promise<boolean> => {
     const user = await resolveProjectionUser(transaction, projection);
-    if (!user) {
-        return false;
-    }
-
-    const plan = findBillingPlan(projection.planKey);
-    await transaction.user.update({
-        where: { id: user.id },
-        data: {
-            stripeCustomerId: projection.customerId,
-            plan: plan?.key ?? user.plan,
+    return matchNullable(user, {
+        nothing: () => Promise.resolve(false),
+        present: async (presentUser) => {
+            const plan = findBillingPlan(projection.planKey);
+            await transaction.user.update({
+                where: { id: presentUser.id },
+                data: {
+                    stripeCustomerId: projection.customerId,
+                    plan: plan?.key ?? presentUser.plan,
+                },
+            });
+            await transaction.subscription.upsert({
+                where: { userId: presentUser.id },
+                create: {
+                    userId: presentUser.id,
+                    ...subscriptionValues(projection),
+                },
+                update: subscriptionValues(projection),
+            });
+            return true;
         },
     });
-    await transaction.subscription.upsert({
-        where: { userId: user.id },
-        create: {
-            userId: user.id,
-            ...subscriptionValues(projection),
-        },
-        update: subscriptionValues(projection),
-    });
-    return true;
 };
 
 const cancelSubscription = async (
@@ -70,31 +67,32 @@ const cancelSubscription = async (
     projection: SubscriptionProjection,
 ): Promise<boolean> => {
     const user = await resolveProjectionUser(transaction, projection);
-    if (!user) {
-        return false;
-    }
-
-    const canceledProjection = {
-        ...projection,
-        status: billingContract.statuses.canceled,
-        cancelAtPeriodEnd: false,
-    };
-    await transaction.user.update({
-        where: { id: user.id },
-        data: {
-            stripeCustomerId: projection.customerId,
-            plan: defaultBillingPlan().key,
+    return matchNullable(user, {
+        nothing: () => Promise.resolve(false),
+        present: async (presentUser) => {
+            const canceledProjection = {
+                ...projection,
+                status: billingContract.statuses.canceled,
+                cancelAtPeriodEnd: billingContract.cancellation.cancelAtPeriodEnd,
+            };
+            await transaction.user.update({
+                where: { id: presentUser.id },
+                data: {
+                    stripeCustomerId: projection.customerId,
+                    plan: defaultBillingPlan().key,
+                },
+            });
+            await transaction.subscription.upsert({
+                where: { userId: presentUser.id },
+                create: {
+                    userId: presentUser.id,
+                    ...subscriptionValues(canceledProjection),
+                },
+                update: subscriptionValues(canceledProjection),
+            });
+            return true;
         },
     });
-    await transaction.subscription.upsert({
-        where: { userId: user.id },
-        create: {
-            userId: user.id,
-            ...subscriptionValues(canceledProjection),
-        },
-        update: subscriptionValues(canceledProjection),
-    });
-    return true;
 };
 
 type ProjectionEffect = (
@@ -124,17 +122,21 @@ const recordOutcome = async (
     return { eventId: command.eventId, outcome };
 };
 
-const applyInTransaction = async (
+const applyProjectionEffect = async (
+    transaction: BillingTransaction,
+    command: BillingWebhookCommand,
+): Promise<boolean> => matchNullable(command.projection, {
+    nothing: () => Promise.resolve(false),
+    present: (projection) => matchNullable(projectionEffects[command.action], {
+        nothing: () => Promise.resolve(false),
+        present: (effect) => effect(transaction, projection),
+    }),
+});
+
+const applyCurrentEvent = async (
     transaction: BillingTransaction,
     command: BillingWebhookCommand,
 ): Promise<BillingWebhookResult> => {
-    const duplicate = await transaction.stripeWebhookEvent.findUnique({
-        where: { id: command.eventId },
-    });
-    if (duplicate) {
-        return { eventId: command.eventId, outcome: billingContract.outcomes.duplicate };
-    }
-
     const newerEvent = command.subscriptionId
         ? await transaction.stripeWebhookEvent.findFirst({
             where: {
@@ -143,19 +145,36 @@ const applyInTransaction = async (
             },
         })
         : null;
-    if (newerEvent) {
-        return recordOutcome(transaction, command, billingContract.outcomes.stale);
-    }
+    return matchNullable(newerEvent, {
+        present: () => recordOutcome(
+            transaction,
+            command,
+            billingContract.outcomes.stale,
+        ),
+        nothing: async () => recordOutcome(
+            transaction,
+            command,
+            await applyProjectionEffect(transaction, command)
+                ? billingContract.outcomes.applied
+                : billingContract.outcomes.ignored,
+        ),
+    });
+};
 
-    const effect = projectionEffects[command.action];
-    const applied = effect && command.projection
-        ? await effect(transaction, command.projection)
-        : false;
-    return recordOutcome(
-        transaction,
-        command,
-        applied ? billingContract.outcomes.applied : billingContract.outcomes.ignored,
-    );
+const applyInTransaction = async (
+    transaction: BillingTransaction,
+    command: BillingWebhookCommand,
+): Promise<BillingWebhookResult> => {
+    const duplicate = await transaction.stripeWebhookEvent.findUnique({
+        where: { id: command.eventId },
+    });
+    return matchNullable(duplicate, {
+        present: () => Promise.resolve({
+            eventId: command.eventId,
+            outcome: billingContract.outcomes.duplicate,
+        }),
+        nothing: () => applyCurrentEvent(transaction, command),
+    });
 };
 
 export const createPrismaBillingWebhookPersistence = (

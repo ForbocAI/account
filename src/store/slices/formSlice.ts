@@ -25,6 +25,8 @@ interface FormState {
     };
 }
 
+export type FormStateKey = keyof FormState;
+
 const initialState: FormState = {
     login: {
         email: '',
@@ -96,7 +98,7 @@ export const formSlice = createSlice({
         setBillingError: (state, action: PayloadAction<string | null>) => {
             state.billing.error = action.payload;
         },
-        resetForm: (state, action: PayloadAction<keyof FormState>) => {
+        resetForm: (state, action: PayloadAction<FormStateKey>) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             state[action.payload] = initialState[action.payload] as any;
         },

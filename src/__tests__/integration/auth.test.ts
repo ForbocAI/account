@@ -8,6 +8,7 @@ import { POST as login } from '@/app/api/auth/login/route';
 import { POST as logout } from '@/app/api/auth/logout/route';
 import { POST as signup } from '@/app/api/auth/signup/route';
 import { createPostgresAuthRateLimitProvider } from '@/components/auth/postgresAuthRateLimitProvider';
+import type { AuthRateLimitPolicyName } from '@/entities/auth/authRateLimitTypes';
 import { hashPassword } from '@/lib/password';
 import { createAuthRateLimitGate } from '@/systems/auth/authRateLimit';
 import { prisma } from './setup';
@@ -41,8 +42,14 @@ describe(fixture.cases.route, () => {
         const response = await logout();
         const cookie = response.headers.get(fixture.headers.setCookie);
         expect(response.status).toBe(httpContract.status.ok);
-        expect(cookie).toContain(`${authContract.cookie.name}=`);
-        expect(cookie).toContain(`Max-Age=${authContract.cookie.clearMaxAgeSeconds}`);
+        expect(cookie).toContain(
+            authContract.cookie.name + fixture.cookie.assignmentSeparator,
+        );
+        expect(cookie).toContain(
+            fixture.cookie.maxAgeAttribute
+            + fixture.cookie.assignmentSeparator
+            + String(authContract.cookie.clearMaxAgeSeconds),
+        );
     });
 
     it(fixture.cases.signup, async () => {
@@ -113,9 +120,13 @@ describe(fixture.cases.sharedDatabase, () => {
             + authRateLimitContract.minimumRetryAfterSeconds;
         const responses = await Promise.all(Array.from(
             { length: attemptCount },
-            (_entry, index) => (index % fixture.instanceCount === 0 ? firstInstance : secondInstance)(
+            (_entry, index) => (
+                index % fixture.instanceCount === fixture.sequence.firstRemainder
+                    ? firstInstance
+                    : secondInstance
+            )(
                 authRequest(fixture.requestUrl, fixture.user),
-                authRateLimitContract.policies.login.scope as 'login',
+                authRateLimitContract.policies.login.scope as AuthRateLimitPolicyName,
             ),
         ));
         const blocked = responses.filter((response) =>
@@ -124,8 +135,9 @@ describe(fixture.cases.sharedDatabase, () => {
 
         expect(blocked).toHaveLength(authRateLimitContract.minimumRetryAfterSeconds);
         expect(buckets).toHaveLength(authRateLimitContract.minimumRetryAfterSeconds);
-        expect(buckets[0].requestCount).toBe(attemptCount);
-        expect(buckets[0].keyHash).not.toContain(fixture.clientIp);
+        const bucket = buckets.at(fixture.sequence.firstIndex);
+        expect(bucket?.requestCount).toBe(attemptCount);
+        expect(bucket?.keyHash).not.toContain(fixture.clientIp);
     });
 
     it(fixture.cases.databaseWindow, async () => {

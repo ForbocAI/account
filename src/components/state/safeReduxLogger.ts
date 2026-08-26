@@ -1,13 +1,21 @@
 import type { Middleware } from '@reduxjs/toolkit';
 import { createLogger } from 'redux-logger';
 import loggingContract from '../../../data/contracts/redux-logging.json';
+import { matchNullable } from '@/components/fp/result';
 
 type UnknownRecord = Readonly<Record<string, unknown>>;
 
-const record = (value: unknown): UnknownRecord =>
-    typeof value === 'object' && value !== null ? value as UnknownRecord : {};
+const record = (value: unknown): UnknownRecord => matchNullable(value, {
+    nothing: () => ({}),
+    present: (candidate) => typeof candidate === 'object'
+        ? candidate as UnknownRecord
+        : {},
+});
 
-const present = (value: unknown): boolean => value !== null && value !== undefined;
+const present = (value: unknown): boolean => matchNullable(value, {
+    nothing: () => false,
+    present: () => true,
+});
 
 const countEntries = (value: unknown): number => Object.keys(record(value)).length;
 

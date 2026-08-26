@@ -33,14 +33,12 @@ export default function BillingPage() {
         dispatch(setBillingError(null));
 
         return createCheckout({ planKey }).unwrap()
-            .then(result => {
-                if (!result.url) {
+            .then((result) => result.url
+                ? window.location.assign(result.url)
+                : (() => {
                     dispatch(setBillingError(billingContract.messages.checkoutFailed));
                     dispatch(setBillingUpgrading(null));
-                    return;
-                }
-                window.location.assign(result.url);
-            })
+                })())
             .catch((err: unknown) => {
                 const e = err as { data?: { error?: string } };
                 dispatch(setBillingError(e.data?.error || billingContract.messages.checkoutFailed));
@@ -53,14 +51,12 @@ export default function BillingPage() {
         dispatch(setBillingError(null));
 
         return openPortal(undefined).unwrap()
-            .then(result => {
-                if (!result.url) {
+            .then((result) => result.url
+                ? window.location.assign(result.url)
+                : (() => {
                     dispatch(setBillingError(billingContract.messages.portalFailed));
                     dispatch(setBillingPortalLoading(false));
-                    return;
-                }
-                window.location.assign(result.url);
-            })
+                })())
             .catch((err: unknown) => {
                 const e = err as { data?: { error?: string } };
                 dispatch(setBillingError(e.data?.error || billingContract.messages.portalFailed));
@@ -68,25 +64,21 @@ export default function BillingPage() {
             });
     };
 
-    if (loading) {
-        return (
+    return loading
+        ? (
         <div className="flex items-center justify-center min-h-[60vh]">
             <Loader2 className="w-8 h-8 text-zinc-500 animate-spin" />
         </div>
-        );
-    }
-
-    if (!billing) {
-        return (
+        )
+        : !billing
+        ? (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <p className="text-[11px] font-mono text-red-500 uppercase tracking-wide">
                     {error || billingContract.messages.billingLoadFailed}
                 </p>
             </div>
-        );
-    }
-
-    return (
+        )
+        : (
         <div className="space-y-12">
             {/* Page Header */}
             <div className="flex flex-col gap-2 border-l-4 border-red-900 pl-6 py-2">

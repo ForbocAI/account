@@ -12,6 +12,8 @@ export type NullableHandlers<Value, Output> = {
     readonly present: (value: Value) => Output;
 };
 
+const nothingValue = Symbol();
+
 export const failure = <ErrorValue>(error: ErrorValue): Result<ErrorValue, never> => ({
     tag: 'failure',
     error,
@@ -32,7 +34,12 @@ export const matchResult = <ErrorValue, Value, Output>(
 export const matchNullable = <Value, Output>(
     value: Value | null | undefined,
     handlers: NullableHandlers<Value, Output>,
-): Output => value == null ? handlers.nothing() : handlers.present(value);
+): Output => {
+    const candidate = value ?? nothingValue;
+    return candidate === nothingValue
+        ? handlers.nothing()
+        : handlers.present(candidate as Value);
+};
 
 export const attempt = <Value>(effect: () => Promise<Value>): Promise<Result<unknown, Value>> =>
     effect().then(success).catch(failure);

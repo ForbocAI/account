@@ -7,7 +7,10 @@ import { createApiKeyRoutes } from '@/systems/apiKeys/apiKeyRoutes';
 
 const createdAt = new Date(fixtures.record.createdAt);
 const rawKey = apiKeyContract.generation.prefix + fixtures.generated.hex;
-const keyPrefix = rawKey.slice(0, apiKeyContract.generation.visiblePrefixCharacters)
+const keyPrefix = rawKey.slice(
+    fixtures.sequence.firstIndex,
+    apiKeyContract.generation.visiblePrefixCharacters,
+)
     + apiKeyContract.generation.mask
     + rawKey.slice(-apiKeyContract.generation.visibleSuffixCharacters);
 
@@ -19,7 +22,7 @@ const record = {
     keyPrefix,
     status: apiKeyContract.status.active,
     createdAt,
-    revokedAt: null,
+    revokedAt: fixtures.record.revokedAt,
 };
 
 const dependencies = (
@@ -40,7 +43,7 @@ const request = (body: unknown) => ({ json: async () => body });
 describe(fixtures.suite, () => {
     it(fixtures.cases.unauthorized, async () => {
         const response = await createApiKeyRoutes(dependencies({
-            readSession: async () => null,
+            readSession: async () => fixtures.session.missing,
         })).list();
 
         expect(response).toBeInstanceOf(Response);

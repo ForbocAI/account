@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import authRateLimitContract from '../../../../data/contracts/auth-rate-limit.json';
 import httpContract from '../../../../data/contracts/http.json';
 import fixture from '../../../../data/tests/auth.json';
+import type { AuthRateLimitPolicyName } from '@/entities/auth/authRateLimitTypes';
 import { createAuthRateLimitGate } from '@/systems/auth/authRateLimit';
 
 const request = (): Request => new Request(fixture.requestUrl, {
@@ -28,7 +29,7 @@ describe(fixture.cases.gate, () => {
         });
         const response = await createAuthRateLimitGate(dependencies(delayedFailure))(
             request(),
-            authRateLimitContract.policies.login.scope as 'login',
+            authRateLimitContract.policies.login.scope as AuthRateLimitPolicyName,
         );
 
         expect(response?.status).toBe(httpContract.status.serviceUnavailable);
@@ -41,7 +42,7 @@ describe(fixture.cases.gate, () => {
         const unavailable = () => Promise.reject<never>(new Error(fixture.cases.unavailable));
         const response = await createAuthRateLimitGate(dependencies(unavailable))(
             request(),
-            authRateLimitContract.policies.login.scope as 'login',
+            authRateLimitContract.policies.login.scope as AuthRateLimitPolicyName,
         );
 
         expect(response?.status).toBe(httpContract.status.serviceUnavailable);

@@ -19,7 +19,7 @@ const subscriptionObject = (status: string) => ({
         planKey: fixture.subscription.planKey,
     },
     status,
-    cancel_at_period_end: false,
+    cancel_at_period_end: fixture.subscription.cancelAtPeriodEnd,
     items: {
         data: [{
             price: { id: fixture.subscription.priceId },
@@ -167,6 +167,6 @@ describe(fixture.cases.database, () => {
             where: { id: fixture.events.unknown.id },
         });
         expect(event?.outcome).toBe(billingContract.outcomes.ignored);
-        expect(await prisma.subscription.count()).toBe(0);
+        expect(await prisma.subscription.count()).toBe(fixture.counts.none);
     });
 });

@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
+import authContract from "../../../data/contracts/auth.json";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/authSlice";
 import { setSignupEmail, setSignupError, resetForm, selectSignupForm } from "@/store/slices/formSlice";
+import type { FormStateKey } from "@/store/slices/formSlice";
 import { useSignupMutation } from "@/store/api/authApi";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/vengeance/Card";
 import { Button } from "@/components/vengeance/Button";
@@ -27,22 +29,22 @@ export default function SignUpPage() {
     dispatch(setSignupError(null));
 
     const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
+    const password = formData.get(authContract.interaction.passwordField) as string;
+    const confirmPassword = formData.get(authContract.interaction.confirmPasswordField) as string;
 
     return password !== confirmPassword
-      ? Promise.resolve(dispatch(setSignupError("Access keys do not match")))
-      : password.length < 8
-      ? Promise.resolve(dispatch(setSignupError("Access key must be at least 8 characters")))
+      ? Promise.resolve(dispatch(setSignupError(authContract.messages.passwordMismatch)))
+      : password.length < authContract.password.minimumLength
+      ? Promise.resolve(dispatch(setSignupError(authContract.messages.passwordTooShort)))
       : signup({ email, password }).unwrap()
           .then(result => {
             dispatch(setCredentials(result.user));
-            dispatch(resetForm("signup"));
-            router.push("/dashboard");
+            dispatch(resetForm(authContract.interaction.signupFormScope as FormStateKey));
+            router.replace(authContract.routes.dashboard);
           })
           .catch((err: unknown) => {
             const error = err as { data?: { error?: string } };
-            dispatch(setSignupError(error.data?.error || "Registration failed"));
+            dispatch(setSignupError(error.data?.error || authContract.messages.registrationFailed));
           });
   };
 
@@ -97,7 +99,7 @@ export default function SignUpPage() {
                   type="password"
                   placeholder="••••••••••••••••"
                   required
-                  minLength={8}
+                  minLength={authContract.password.minimumLength}
                 />
               </div>
 
@@ -110,7 +112,7 @@ export default function SignUpPage() {
                   type="password"
                   placeholder="••••••••••••••••"
                   required
-                  minLength={8}
+                  minLength={authContract.password.minimumLength}
                 />
               </div>
 

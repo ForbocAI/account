@@ -9,7 +9,8 @@
     "revoke": "revokes an owned active key"
   },
   "session": {
-    "userId": "account-key-user"
+    "userId": "account-key-user",
+    "missing": null
   },
   "user": {
     "email": "keys-contract@forboc.ai",
@@ -29,7 +30,14 @@
   },
   "record": {
     "id": "account-key-record",
-    "createdAt": "2026-01-01T00:00:00.000Z"
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "revokedAt": null
+  },
+  "fields": {
+    "rawKey": "rawKey"
+  },
+  "sequence": {
+    "firstIndex": 0
   },
   "failure": {
     "message": "authored persistence failure"

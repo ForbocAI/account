@@ -15,7 +15,7 @@ describe(fixture.cases.identity, () => {
         )).toBe(fixture.clientIp);
         expect(resolveAuthRequestIdentity(
             headers(fixture.twoProxyForwardedChain),
-            authRateLimitContract.identity.defaultTrustedProxyHops + 1,
+            fixture.twoProxyTrustedHops,
         )).toBe(fixture.clientIp);
     });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import apiKeyContract from "../../../data/contracts/api-keys.json";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   setKeysNewKeyName,
@@ -10,6 +11,7 @@ import {
   resetForm,
   selectKeysForm
 } from "@/store/slices/formSlice";
+import type { FormStateKey } from "@/store/slices/formSlice";
 import {
   useGetKeysQuery,
   useCreateKeyMutation,
@@ -44,7 +46,7 @@ export default function KeysPage() {
             .then(result => dispatch(setKeysRevealedKey(result.key.rawKey)))
             .catch((err: unknown) => {
               const e = err as { data?: { error?: string } };
-              dispatch(setKeysError(e.data?.error || "Failed to create key"));
+              dispatch(setKeysError(e.data?.error || apiKeyContract.messages.createFailed));
             });
         });
 
@@ -53,17 +55,17 @@ export default function KeysPage() {
       await revokeKey(id).unwrap();
     } catch (err: unknown) {
       const e = err as { data?: { error?: string } };
-      dispatch(setKeysError(e.data?.error || "Failed to revoke key"));
+      dispatch(setKeysError(e.data?.error || apiKeyContract.messages.revokeFailed));
     }
   };
 
   const handleClose = () => {
-    dispatch(resetForm("keys"));
+    dispatch(resetForm(apiKeyContract.interaction.formScope as FormStateKey));
   };
 
-  const handleCopyKey = async () => {
-    revealedKey && await navigator.clipboard.writeText(revealedKey);
-  };
+  const handleCopyKey = async () => revealedKey
+    ? navigator.clipboard.writeText(revealedKey)
+    : Promise.resolve();
 
   return (
     <div className="space-y-12">
@@ -109,7 +111,7 @@ export default function KeysPage() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
                       <span className="font-mono text-sm text-white">{key.name}</span>
-                      <Badge variant={key.status === "active" ? "success" : "danger"}>
+                      <Badge variant={key.status === apiKeyContract.status.active ? "success" : "danger"}>
                         {key.status}
                       </Badge>
                     </div>
@@ -118,7 +120,7 @@ export default function KeysPage() {
                     </code>
                   </div>
 
-                  {key.status === "active" && (
+                  {key.status === apiKeyContract.status.active && (
                     <div className="flex items-center gap-2">
                       <Button
                         variant="destructive"
@@ -177,9 +179,9 @@ export default function KeysPage() {
                         placeholder="e.g. Production Gateway"
                         value={newKeyName}
                         onChange={(e) => dispatch(setKeysNewKeyName(e.target.value))}
-                        onKeyDown={(e) => {
-                          e.key === "Enter" && handleCreate();
-                        }}
+                        onKeyDown={(e) => e.key === apiKeyContract.interaction.submitKey
+                          ? void handleCreate()
+                          : undefined}
                         autoFocus
                       />
                     </div>

@@ -1,0 +1,38 @@
+{
+  "suite": "aggregate verification runner",
+  "cases": {
+    "complete": "executes every stage after an earlier failure",
+    "restoreSuccess": "restores generated output after success",
+    "restoreFailure": "restores generated output after an interrupted effect",
+    "structuralWarnings": "recognizes structural FP findings as release failures",
+    "advisoryWarnings": "keeps advisory FP findings non-blocking"
+  },
+  "statuses": {
+    "success": 0,
+    "failure": 1
+  },
+  "stages": [
+    {"id": "first", "status": 0},
+    {"id": "failing", "status": 1},
+    {"id": "last", "status": 0}
+  ],
+  "expectedStageIds": ["first", "failing", "last"],
+  "generated": {
+    "temporaryPrefix": "account-verification-",
+    "sourceDirectory": "generated",
+    "hiddenDirectory": "hidden/generated",
+    "markerFile": "marker.txt",
+    "content": "authored generated-client marker",
+    "failure": "authored interrupted-stage failure"
+  },
+  "booleans": {
+    "yes": true,
+    "no": false
+  },
+  "guardOutput": {
+    "path": "[path] src/components/example.ts",
+    "advisory": "[warn] No documented FP primitive selected",
+    "lineSeparator": "\n"
+  },
+  "encoding": "utf8"
+}

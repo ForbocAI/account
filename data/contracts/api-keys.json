@@ -12,6 +12,14 @@
     "active": "active",
     "revoked": "revoked"
   },
+  "interaction": {
+    "formScope": "keys",
+    "submitKey": "Enter"
+  },
+  "messages": {
+    "createFailed": "Failed to create key",
+    "revokeFailed": "Failed to revoke key"
+  },
   "ordering": {
     "createdAt": "desc"
   }

@@ -8,12 +8,16 @@
   "identity": {
     "hashSecretEnvironment": "AUTH_RATE_LIMIT_HASH_SECRET",
     "hashAlgorithm": "sha256",
+    "hashEncoding": "hex",
     "separator": ":",
+    "forwardedForSeparator": ",",
     "anonymous": "unresolved-client",
     "forwardedForHeader": "x-forwarded-for",
     "realIpHeader": "x-real-ip",
     "trustedProxyHopsEnvironment": "AUTH_RATE_LIMIT_TRUSTED_PROXY_HOPS",
-    "defaultTrustedProxyHops": 1
+    "defaultTrustedProxyHops": 1,
+    "minimumTrustedProxyHops": 0,
+    "selectedClientOffset": 1
   },
   "policies": {
     "login": {

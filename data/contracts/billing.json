@@ -49,6 +49,12 @@
   "time": {
     "millisecondsPerSecond": 1000
   },
+  "sequence": {
+    "firstIndex": 0
+  },
+  "cancellation": {
+    "cancelAtPeriodEnd": false
+  },
   "messages": {
     "missingSignature": "Missing Stripe signature or webhook configuration",
     "invalidSignature": "Invalid Stripe signature",

@@ -27,13 +27,9 @@ const ignore = (event: Stripe.Event): IgnoreWebhookInstruction => ({
 });
 
 const projectSubscription = (subscription: Stripe.Subscription): SubscriptionProjection | null => {
-    const item = subscription.items.data[0];
+    const item = subscription.items.data[billingContract.sequence.firstIndex];
     const customerId = objectId(subscription.customer);
-    if (!item || !customerId) {
-        return null;
-    }
-
-    return {
+    return item && customerId ? {
         subscriptionId: subscription.id,
         customerId,
         userId: subscription.metadata.userId ?? null,
@@ -49,7 +45,7 @@ const projectSubscription = (subscription: Stripe.Subscription): SubscriptionPro
             item.current_period_end * billingContract.time.millisecondsPerSecond,
         ),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
-    };
+    } : null;
 };
 
 const checkoutCompleted = (event: Stripe.Event): StripeWebhookInstruction => {

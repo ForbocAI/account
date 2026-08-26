@@ -2,6 +2,7 @@
   "name": "account",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.19.1",
   "engines": {
     "node": ">=20.9.0"
   },
@@ -9,9 +10,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
     "test": "vitest",
     "test:integration": "vitest --config vitest.config.integration.mjs",
     "check:data": "node scripts/check-data-contracts.mjs",
+    "check:layout": "node scripts/check-source-layout.mjs",
     "verify:all": "bash scripts/verify-all.sh",
     "postinstall": "prisma generate"
   },

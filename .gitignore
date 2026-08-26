@@ -43,6 +43,7 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+/.verification
 
 # generated architecture graph
 /graphify-out

@@ -5,6 +5,7 @@ import httpContract from '../../../../data/contracts/http.json';
 import fixture from '../../../../data/tests/billing-webhooks.json';
 import type {
     BillingWebhookCommand,
+    BillingWebhookResult,
     StripeWebhookDependencies,
 } from '@/entities/billing/billingTypes';
 import { createStripeWebhookRoute } from '@/systems/billing/stripeWebhookRoutes';
@@ -35,7 +36,7 @@ const subscription = {
         planKey: fixture.subscription.planKey,
     },
     status: fixture.subscription.status,
-    cancel_at_period_end: false,
+    cancel_at_period_end: fixture.subscription.cancelAtPeriodEnd,
     items: {
         data: [{
             price: { id: fixture.subscription.priceId },
@@ -50,20 +51,25 @@ const request = (signature?: string): Request => new Request(fixture.requestUrl,
     headers: signature ? { [fixture.signatureHeader]: signature } : undefined,
 });
 
+type CommandLedger = { commands: readonly BillingWebhookCommand[] };
+
+const emptyLedger = (): CommandLedger => ({ commands: [] });
+
+const invalidSignature = (): never => {
+    throw new Error(fixture.failure);
+};
+
 const dependencies = (
-    commands: BillingWebhookCommand[],
-    apply: StripeWebhookDependencies['persistence']['apply'] = async (command) => {
-        commands.push(command);
+    ledger: CommandLedger,
+    apply: (command: BillingWebhookCommand) => Promise<BillingWebhookResult> = async (command) => {
+        ledger.commands = [...ledger.commands, command];
         return { eventId: command.eventId, outcome: billingContract.outcomes.applied };
     },
 ): StripeWebhookDependencies => ({
     readWebhookSecret: () => fixture.secret,
-    verifyEvent: (_payload, signature) => {
-        if (signature !== fixture.signature) {
-            throw new Error(fixture.failure);
-        }
-        return checkoutEvent;
-    },
+    verifyEvent: (_payload, signature) => signature === fixture.signature
+        ? checkoutEvent
+        : invalidSignature(),
     retrieveSubscription: async () => subscription,
     persistence: { apply },
     reportFailure: () => undefined,
@@ -71,24 +77,26 @@ const dependencies = (
 
 describe(fixture.cases.routes, () => {
     it(fixture.cases.valid, async () => {
-        const commands: BillingWebhookCommand[] = [];
-        const response = await createStripeWebhookRoute(dependencies(commands))(
+        const ledger = emptyLedger();
+        const response = await createStripeWebhookRoute(dependencies(ledger))(
             request(fixture.signature),
         );
 
         expect(response.status).toBe(httpContract.status.ok);
-        expect(commands).toHaveLength(billingContract.checkout.quantity);
-        expect(commands[0].eventId).toBe(fixture.events.checkout.id);
+        expect(ledger.commands).toHaveLength(billingContract.checkout.quantity);
+        expect(ledger.commands.at(fixture.sequence.firstIndex)?.eventId).toBe(
+            fixture.events.checkout.id,
+        );
     });
 
     it(fixture.cases.missingSignature, async () => {
-        const response = await createStripeWebhookRoute(dependencies([]))(request());
+        const response = await createStripeWebhookRoute(dependencies(emptyLedger()))(request());
         expect(response.status).toBe(httpContract.status.badRequest);
         expect(await response.json()).toEqual({ error: billingContract.messages.missingSignature });
     });
 
     it(fixture.cases.invalidSignature, async () => {
-        const response = await createStripeWebhookRoute(dependencies([]))(
+        const response = await createStripeWebhookRoute(dependencies(emptyLedger()))(
             request(fixture.invalidSignature),
         );
         expect(response.status).toBe(httpContract.status.badRequest);
@@ -97,7 +105,7 @@ describe(fixture.cases.routes, () => {
 
     it(fixture.cases.transactionFailure, async () => {
         const reject = async (): Promise<never> => Promise.reject(new Error(fixture.failure));
-        const response = await createStripeWebhookRoute(dependencies([], reject))(
+        const response = await createStripeWebhookRoute(dependencies(emptyLedger(), reject))(
             request(fixture.signature),
         );
         expect(response.status).toBe(httpContract.status.internalServerError);

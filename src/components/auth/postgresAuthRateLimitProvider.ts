@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
 import authRateLimitContract from '../../../data/contracts/auth-rate-limit.json';
+import { matchNullable } from '@/components/fp/result';
 import type { AuthRateLimitProvider } from '@/entities/auth/authRateLimitTypes';
 
 type AuthRateLimitRow = {
@@ -38,12 +39,14 @@ export const createPostgresAuthRateLimitProvider = (
             RETURNING "request_count", "expires_at"
         `;
         const row = rows[0];
-        if (!row) {
-            throw new Error(authRateLimitContract.messages.persistenceEmpty);
-        }
-        return {
-            requestCount: row.request_count,
-            expiresAt: row.expires_at,
-        };
+        return matchNullable(row, {
+            nothing: () => {
+                throw new Error(authRateLimitContract.messages.persistenceEmpty);
+            },
+            present: (presentRow) => ({
+                requestCount: presentRow.request_count,
+                expiresAt: presentRow.expires_at,
+            }),
+        });
     },
 });

@@ -29,15 +29,13 @@ export const createStripeWebhookRoute = (
 ): StripeWebhookRoute => async (request) => {
     const secret = dependencies.readWebhookSecret();
     const signature = request.headers.get(billingContract.headers.stripeSignature);
-    if (!secret || !signature) {
-        return json(
+    return !secret || !signature
+        ? json(
             { error: billingContract.messages.missingSignature },
             httpContract.status.badRequest,
-        );
-    }
-
-    const payload = await request.text();
-    return matchResult(attemptSync(() => dependencies.verifyEvent(payload, signature, secret)), {
+        )
+        : request.text().then((payload) => matchResult(
+            attemptSync(() => dependencies.verifyEvent(payload, signature, secret)), {
         failure: async () => json(
             { error: billingContract.messages.invalidSignature },
             httpContract.status.badRequest,
@@ -58,5 +56,5 @@ export const createStripeWebhookRoute = (
                 httpContract.status.ok,
             ),
         }),
-    });
+    }));
 };

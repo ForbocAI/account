@@ -1,0 +1,75 @@
+{
+  "action": {
+    "unknownType": "unknown"
+  },
+  "auth": {
+    "suite": "authSlice",
+    "cases": {
+      "initial": "handles the authored initial state",
+      "unauthenticated": "given an unauthenticated account",
+      "credentials": "records credentials as an authenticated account",
+      "authenticated": "given an authenticated account",
+      "logout": "clears the account identity on logout"
+    },
+    "initialState": {
+      "user": null,
+      "isAuthenticated": false
+    },
+    "user": {
+      "id": "account-state-user",
+      "email": "state-fixture@forboc.invalid"
+    },
+    "authenticatedState": {
+      "user": {
+        "id": "account-state-user",
+        "email": "state-fixture@forboc.invalid"
+      },
+      "isAuthenticated": true
+    }
+  },
+  "form": {
+    "suite": "formSlice",
+    "cases": {
+      "initial": "handles the authored initial state",
+      "login": "given login workflow state",
+      "email": "records the authored login email",
+      "error": "records the authored login error",
+      "dirty": "given authored dirty login workflow state",
+      "reset": "resets only the selected login workflow"
+    },
+    "scope": "login",
+    "initialState": {
+      "login": {
+        "email": "",
+        "loading": false,
+        "error": null
+      },
+      "signup": {
+        "email": "",
+        "loading": false,
+        "error": null
+      },
+      "keys": {
+        "newKeyName": "",
+        "showModal": false,
+        "revealedKey": null,
+        "creating": false,
+        "error": null
+      },
+      "billing": {
+        "upgrading": null,
+        "portalLoading": false,
+        "error": null
+      }
+    },
+    "login": {
+      "email": "login-state@forboc.invalid",
+      "error": "Authored login rejection"
+    },
+    "dirtyLogin": {
+      "email": "dirty-login-state@forboc.invalid",
+      "loading": true,
+      "error": "Authored dirty login state"
+    }
+  }
+}

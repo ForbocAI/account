@@ -18,19 +18,21 @@ describe(fixtures.suite, () => {
             randomHex: () => fixtures.generated.hex,
             hash: (value) => createHash(apiKeyContract.generation.hashAlgorithm)
                 .update(value)
-                .digest(apiKeyContract.generation.encoding as 'hex'),
+                .digest()
+                .toString(apiKeyContract.generation.encoding as BufferEncoding),
         });
         const response = await routes.create({ json: async () => fixtures.requests.valid });
         const body = await response.json();
         const keyHash = createHash(apiKeyContract.generation.hashAlgorithm)
             .update(body.key.rawKey)
-            .digest(apiKeyContract.generation.encoding as 'hex');
+            .digest()
+            .toString(apiKeyContract.generation.encoding as BufferEncoding);
         const stored = await prisma.apiKey.findUnique({ where: { keyHash } });
 
         expect(response.status).toBe(httpContract.status.created);
         expect(stored?.userId).toBe(user.id);
         expect(stored?.status).toBe(apiKeyContract.status.active);
-        expect(stored).not.toHaveProperty('rawKey');
+        expect(stored).not.toHaveProperty(fixtures.fields.rawKey);
     });
 
     it(fixtures.cases.revoke, async () => {
