@@ -6,7 +6,7 @@ export default defineConfig({
         environment: 'node',
         globals: true,
         alias: {
-            '@': path.resolve(__dirname, './src'),
+            '@': path.resolve(import.meta.dirname, './src'),
         },
     },
 });

@@ -1,6 +1,5 @@
-import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import pg from "pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -15,12 +14,12 @@ function createPrismaClient(): PrismaClient {
   return !connectionString
     ? (() => { throw new Error("No database URL found. Set DATABASE_URL, POSTGRES_URL, or POSTGRES_PRISMA_URL."); })()
     : new PrismaClient({
-        adapter: new PrismaPg(new pg.Pool({
+        adapter: new PrismaPg({
           connectionString,
           ssl: (!connectionString.includes("localhost") && !connectionString.includes("127.0.0.1"))
             ? { rejectUnauthorized: false }
             : undefined,
-        })),
+        }),
       });
 }
 

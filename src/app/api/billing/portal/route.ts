@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { verifyToken, COOKIE_NAME } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
               : prisma.user.findUnique({ where: { id: session.userId } }).then(async user =>
                   (!user || !user.stripeCustomerId)
                     ? NextResponse.json({ error: "No billing account found" }, { status: 404 })
-                    : stripe.billingPortal.sessions.create({
+                    : getStripe().billingPortal.sessions.create({
                         customer: user.stripeCustomerId,
                         return_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://console.forboc.ai"}/billing`,
                       }).then(portalSession => NextResponse.json({ url: portalSession.url }))

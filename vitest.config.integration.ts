@@ -8,7 +8,7 @@ export default defineConfig({
         setupFiles: ['./src/__tests__/integration/setup.ts'],
         include: ['src/__tests__/integration/**/*.test.ts'],
         alias: {
-            '@': path.resolve(__dirname, './src'),
+            '@': path.resolve(import.meta.dirname, './src'),
         },
     },
 });

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import Stripe from "stripe";
 
 const handleCheckoutSessionCompleted = async (session: Stripe.Checkout.Session) =>
     (session.metadata?.userId && session.metadata?.planKey && session.subscription)
-        ? stripe.subscriptions.retrieve(session.subscription as string).then(async sub =>
+        ? getStripe().subscriptions.retrieve(session.subscription as string).then(async sub =>
             prisma.user.update({
                 where: { id: session.metadata!.userId },
                 data: { plan: session.metadata!.planKey, stripeCustomerId: session.customer as string },
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
                 ? NextResponse.json({ error: "Missing signature" }, { status: 400 })
                 : Promise.resolve().then(() => {
                     try {
-                        return stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET as string);
+                        return getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET as string);
                     } catch (err) {
                         return null;
                     }

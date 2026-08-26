@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { stripe, PLANS } from "@/lib/stripe";
+import { getStripe, PLANS } from "@/lib/stripe";
 import { verifyToken, COOKIE_NAME } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
@@ -52,11 +52,11 @@ export async function POST(request: NextRequest) {
                                         ? NextResponse.json({ error: "User not found" }, { status: 404 })
                                         : (user.stripeCustomerId
                                             ? Promise.resolve(user.stripeCustomerId)
-                                            : stripe.customers.create({ email: user.email, metadata: { userId: user.id } }).then(customer =>
+                                            : getStripe().customers.create({ email: user.email, metadata: { userId: user.id } }).then(customer =>
                                                 prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId: customer.id } }).then(() => customer.id)
                                               )
                                           ).then(customerId =>
-                                              stripe.checkout.sessions.create({
+                                              getStripe().checkout.sessions.create({
                                                   customer: customerId,
                                                   mode: "subscription",
                                                   line_items: [{ price: PLANS[body.planKey as keyof typeof PLANS].priceId as string, quantity: 1 }],
