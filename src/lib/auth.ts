@@ -5,6 +5,13 @@ import authContract from "../../data/contracts/auth.json";
 
 const COOKIE_NAME = authContract.cookie.name;
 
+const cookieDomain = (): string | undefined =>
+  process.env[authContract.cookie.domainEnvironment]
+  ?? (process.env[authContract.runtime.deploymentEnvironment]
+      === authContract.runtime.productionEnvironment
+    ? authContract.cookie.productionDomain
+    : undefined);
+
 function getJwtSecret(): Uint8Array {
   const secret = process.env[authContract.jwt.secretEnvironment];
   return secret
@@ -37,6 +44,7 @@ export function setAuthCookie(response: NextResponse, token: string): void {
     secure: process.env.NODE_ENV === "production",
     sameSite: authContract.cookie.sameSite as "lax",
     path: authContract.cookie.path,
+    domain: cookieDomain(),
     maxAge: authContract.cookie.maxAgeSeconds,
   });
 }
@@ -47,6 +55,7 @@ export function clearAuthCookie(response: NextResponse): void {
     secure: process.env.NODE_ENV === "production",
     sameSite: authContract.cookie.sameSite as "lax",
     path: authContract.cookie.path,
+    domain: cookieDomain(),
     maxAge: authContract.cookie.clearMaxAgeSeconds,
   });
 }
